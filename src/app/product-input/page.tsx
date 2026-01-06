@@ -11,8 +11,7 @@ type ProductFormValues = {
     sku: string;
     category: string;
     brand: string;
-    price: number;
-    wholesalePrice: number;
+    basePrice: number;
     stock: number;
 };
 
@@ -25,12 +24,12 @@ export default function ProductInputPage() {
             id: `NEW-${Date.now()}`,
             name: values.name,
             sku: values.sku,
+            slug: values.sku.toLowerCase(),
             category: values.category,
             brand: values.brand,
-            price: values.price,
-            wholesalePrice: values.wholesalePrice,
+            basePrice: values.basePrice,
             stock: values.stock,
-            status: "active",
+            isActive: true,
         };
 
         setProducts((prev) => [newProduct, ...prev]);
@@ -90,24 +89,9 @@ export default function ProductInputPage() {
                     </Form.Item>
 
                     <Form.Item
-                        label="Retail Price ($) – Regular Customer"
-                        name="price"
-                        rules={[{ required: true, message: "Please enter retail price" }]}
-                    >
-                        <InputNumber
-                            min={0}
-                            step={0.01}
-                            style={{ width: "100%" }}
-                            prefix="$"
-                        />
-                    </Form.Item>
-
-                    <Form.Item
-                        label="Wholesale Price ($) – Wholesale Customer"
-                        name="wholesalePrice"
-                        rules={[
-                            { required: true, message: "Please enter wholesale price" },
-                        ]}
+                        label="Base Price ($)"
+                        name="basePrice"
+                        rules={[{ required: true, message: "Please enter base price" }]}
                     >
                         <InputNumber
                             min={0}
@@ -149,13 +133,8 @@ export default function ProductInputPage() {
                         { title: "Category", dataIndex: "category" },
                         { title: "Brand", dataIndex: "brand" },
                         {
-                            title: "Retail Price",
-                            dataIndex: "price",
-                            render: (v) => `$${v.toFixed(2)}`,
-                        },
-                        {
-                            title: "Wholesale Price",
-                            dataIndex: "wholesalePrice",
+                            title: "Base Price",
+                            dataIndex: "basePrice",
                             render: (v) => `$${v.toFixed(2)}`,
                         },
                         { title: "Stock", dataIndex: "stock" },

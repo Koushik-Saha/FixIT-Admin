@@ -46,7 +46,7 @@ export default function OrdersPage() {
                 params.endDate = dateRange[1];
             }
 
-            const data = await getOrders(params);
+            const data = await getOrders(params) as Order[];
             setOrders(data);
         } catch (error) {
             message.error("Failed to load orders");

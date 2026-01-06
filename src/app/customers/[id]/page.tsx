@@ -44,9 +44,9 @@ export default function CustomerProfilePage() {
     const loadData = async () => {
         try {
             const [customerData, ordersData, repairsData] = await Promise.all([
-                getCustomer(params.id as string),
-                getOrders({ customerId: params.id as string }),
-                getRepairs({ customerId: params.id as string }),
+                getCustomer(params.id as string) as Promise<Customer>,
+                getOrders({ customerId: params.id as string }) as Promise<Order[]>,
+                getRepairs({ customerId: params.id as string }) as Promise<RepairTicket[]>,
             ]);
             setCustomer(customerData);
             setOrders(ordersData);

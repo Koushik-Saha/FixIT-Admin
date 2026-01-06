@@ -40,7 +40,7 @@ export default function RepairTicketDetailsPage() {
 
     const loadTicket = async () => {
         try {
-            const data = await getRepair(params.id as string);
+            const data = await getRepair(params.id as string) as RepairTicket;
             setTicket(data);
         } catch (error) {
             message.error("Failed to load ticket");

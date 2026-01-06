@@ -42,7 +42,7 @@ export default function OrderDetailsPage() {
 
     const loadOrder = async () => {
         try {
-            const data = await getOrder(params.id as string);
+            const data = await getOrder(params.id as string) as Order;
             setOrder(data);
             form.setFieldsValue({
                 status: data.status,

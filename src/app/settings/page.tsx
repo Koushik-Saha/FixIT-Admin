@@ -22,7 +22,7 @@ export default function SettingsPage() {
                             label: "General",
                             children: (
                                 <Form form={form} layout="vertical" onFinish={handleSubmit}>
-                                    <Divider orientation="left">Company Info</Divider>
+                                    <Divider>Company Info</Divider>
                                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                                         <Form.Item name="companyName" label="Company Name">
                                             <Input />
@@ -38,12 +38,12 @@ export default function SettingsPage() {
                                         <TextArea rows={3} />
                                     </Form.Item>
 
-                                    <Divider orientation="left">Tax Settings</Divider>
+                                    <Divider>Tax Settings</Divider>
                                     <Form.Item name="defaultTaxRate" label="Default Tax Rate (%)">
                                         <InputNumber min={0} max={100} style={{ width: "100%" }} />
                                     </Form.Item>
 
-                                    <Divider orientation="left">Email Settings</Divider>
+                                    <Divider>Email Settings</Divider>
                                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                                         <Form.Item name="fromEmail" label="From Email">
                                             <Input type="email" />
@@ -66,7 +66,7 @@ export default function SettingsPage() {
                             label: "Payment",
                             children: (
                                 <Form layout="vertical" onFinish={handleSubmit}>
-                                    <Divider orientation="left">Stripe Settings</Divider>
+                                    <Divider>Stripe Settings</Divider>
                                     <Form.Item name="stripePublishableKey" label="Publishable Key">
                                         <Input />
                                     </Form.Item>
@@ -84,7 +84,7 @@ export default function SettingsPage() {
                             label: "Shipping",
                             children: (
                                 <Form layout="vertical" onFinish={handleSubmit}>
-                                    <Divider orientation="left">Shipping Methods</Divider>
+                                    <Divider>Shipping Methods</Divider>
                                     <Form.Item name="freeShippingThreshold" label="Free Shipping Threshold">
                                         <InputNumber min={0} prefix="$" style={{ width: "100%" }} />
                                     </Form.Item>

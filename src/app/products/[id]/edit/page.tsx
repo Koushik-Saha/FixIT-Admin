@@ -32,7 +32,7 @@ export default function EditProductPage() {
     useEffect(() => {
         const loadProduct = async () => {
             try {
-                const product = await getProduct(params.id as string);
+                const product = await getProduct(params.id as string) as Product;
                 form.setFieldsValue(product);
             } catch (error) {
                 message.error("Failed to load product");
@@ -76,7 +76,7 @@ export default function EditProductPage() {
                 }
             >
                 <Form form={form} layout="vertical" onFinish={handleSubmit}>
-                    <Divider orientation="left">Basic Info</Divider>
+                    <Divider>Basic Info</Divider>
                     <Space direction="vertical" style={{ width: "100%" }} size="large">
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                             <Form.Item name="name" label="Product Name" rules={[{ required: true }]}>
@@ -105,7 +105,7 @@ export default function EditProductPage() {
                             </Form.Item>
                         </div>
 
-                        <Divider orientation="left">Device Info</Divider>
+                        <Divider>Device Info</Divider>
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
                             <Form.Item name="brand" label="Brand" rules={[{ required: true }]}>
                                 <Select
@@ -127,7 +127,7 @@ export default function EditProductPage() {
                             </Form.Item>
                         </div>
 
-                        <Divider orientation="left">Pricing</Divider>
+                        <Divider>Pricing</Divider>
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                             <Form.Item name="basePrice" label="Base Price" rules={[{ required: true }]}>
                                 <InputNumber min={0} prefix="$" style={{ width: "100%" }} />
@@ -149,7 +149,7 @@ export default function EditProductPage() {
                             </Form.Item>
                         </div>
 
-                        <Divider orientation="left">Inventory</Divider>
+                        <Divider>Inventory</Divider>
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                             <Form.Item name="stock" label="Total Stock" rules={[{ required: true }]}>
                                 <InputNumber min={0} style={{ width: "100%" }} />
@@ -159,7 +159,7 @@ export default function EditProductPage() {
                             </Form.Item>
                         </div>
 
-                        <Divider orientation="left">Media</Divider>
+                        <Divider>Media</Divider>
                         <Form.Item name="thumbnail" label="Thumbnail URL">
                             <Input placeholder="https://example.com/image.jpg" />
                         </Form.Item>
@@ -169,7 +169,7 @@ export default function EditProductPage() {
                             </Upload>
                         </Form.Item>
 
-                        <Divider orientation="left">Details</Divider>
+                        <Divider>Details</Divider>
                         <Form.Item name="description" label="Description">
                             <TextArea rows={4} placeholder="Product description" />
                         </Form.Item>
@@ -180,7 +180,7 @@ export default function EditProductPage() {
                             />
                         </Form.Item>
 
-                        <Divider orientation="left">SEO</Divider>
+                        <Divider>SEO</Divider>
                         <Form.Item name="metaTitle" label="Meta Title">
                             <Input placeholder="SEO title" />
                         </Form.Item>
@@ -188,7 +188,7 @@ export default function EditProductPage() {
                             <TextArea rows={2} placeholder="SEO description" />
                         </Form.Item>
 
-                        <Divider orientation="left">Flags</Divider>
+                        <Divider>Flags</Divider>
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 16 }}>
                             <Form.Item name="isActive" label="Active" valuePropName="checked">
                                 <Switch />

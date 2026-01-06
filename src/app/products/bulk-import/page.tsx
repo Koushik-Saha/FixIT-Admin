@@ -55,11 +55,16 @@ export default function BulkImportPage() {
             return;
         }
 
+        const file = fileList[0].originFileObj;
+        if (!file) {
+            message.error("No file selected");
+            return;
+        }
+
         setImporting(true);
         setProgress(0);
 
         try {
-            const file = fileList[0].originFileObj;
             const reader = new FileReader();
 
             reader.onload = async (e) => {

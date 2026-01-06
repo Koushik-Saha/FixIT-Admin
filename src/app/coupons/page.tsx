@@ -26,7 +26,7 @@ export default function CouponsPage() {
     const loadCoupons = async () => {
         setLoading(true);
         try {
-            const data = await getCoupons();
+            const data = await getCoupons() as Coupon[];
             setCoupons(data);
         } catch (error) {
             message.error("Failed to load coupons");

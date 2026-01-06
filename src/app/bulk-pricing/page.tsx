@@ -32,11 +32,19 @@ export default function BulkPricingPage() {
         const rm = 1 + (retailDelta || 0) / 100;
         const wm = 1 + (wholesaleDelta || 0) / 100;
 
-        return products.map((p) => ({
-            ...p,
-            newRetail: p.price * rm,
-            newWholesale: p.wholesalePrice * wm,
-        }));
+        return products.map((p) => {
+            const currentWholesale = p.wholesaleDiscounts?.tier1
+                ? p.basePrice * (1 - p.wholesaleDiscounts.tier1 / 100)
+                : p.basePrice * 0.9; // default 10% discount
+
+            return {
+                ...p,
+                currentRetail: p.basePrice,
+                currentWholesale,
+                newRetail: p.basePrice * rm,
+                newWholesale: currentWholesale * wm,
+            };
+        });
     }, [products, retailDelta, wholesaleDelta]);
 
     const applyChanges = () => {
@@ -44,11 +52,20 @@ export default function BulkPricingPage() {
         const wm = 1 + (wholesaleDelta || 0) / 100;
 
         setProducts((prev) =>
-            prev.map((p) => ({
-                ...p,
-                price: parseFloat((p.price * rm).toFixed(2)),
-                wholesalePrice: parseFloat((p.wholesalePrice * wm).toFixed(2)),
-            })),
+            prev.map((p) => {
+                const newBasePrice = parseFloat((p.basePrice * rm).toFixed(2));
+                const updatedDiscounts = p.wholesaleDiscounts ? {
+                    tier1: p.wholesaleDiscounts.tier1,
+                    tier2: p.wholesaleDiscounts.tier2,
+                    tier3: p.wholesaleDiscounts.tier3,
+                } : undefined;
+
+                return {
+                    ...p,
+                    basePrice: newBasePrice,
+                    wholesaleDiscounts: updatedDiscounts,
+                };
+            }),
         );
 
         setRetailDelta(0);
@@ -131,7 +148,7 @@ export default function BulkPricingPage() {
                 style={{ marginTop: 24 }}
             >
                 <Table<
-                        Product & { newRetail: number; newWholesale: number }
+                        Product & { currentRetail: number; currentWholesale: number; newRetail: number; newWholesale: number }
                     >
                     rowKey="id"
                     dataSource={previewProducts}
@@ -142,7 +159,7 @@ export default function BulkPricingPage() {
                         { title: "SKU", dataIndex: "sku" },
                         {
                             title: "Current Retail",
-                            dataIndex: "price",
+                            dataIndex: "currentRetail",
                             render: (v) => `$${v.toFixed(2)}`,
                         },
                         {
@@ -156,7 +173,7 @@ export default function BulkPricingPage() {
                         },
                         {
                             title: "Current Wholesale",
-                            dataIndex: "wholesalePrice",
+                            dataIndex: "currentWholesale",
                             render: (v) => `$${v.toFixed(2)}`,
                         },
                         {

@@ -37,7 +37,7 @@ export default function CustomersPage() {
             if (roleFilter) params.role = roleFilter;
             if (wholesaleStatusFilter) params.wholesaleStatus = wholesaleStatusFilter;
 
-            const data = await getCustomers(params);
+            const data = await getCustomers(params) as Customer[];
             setCustomers(data);
         } catch (error) {
             message.error("Failed to load customers");

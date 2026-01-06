@@ -16,7 +16,7 @@ export default function BannersPage() {
     const loadBanners = async () => {
         setLoading(true);
         try {
-            const data = await getBanners();
+            const data = await getBanners() as Banner[];
             setBanners(data);
         } catch (error) {
             message.error("Failed to load banners");

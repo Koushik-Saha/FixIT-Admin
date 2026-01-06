@@ -39,7 +39,7 @@ export default function RepairsPage() {
             if (priorityFilter) params.priority = priorityFilter;
             if (storeFilter) params.store = storeFilter;
 
-            const data = await getRepairs(params);
+            const data = await getRepairs(params) as RepairTicket[];
             setRepairs(data);
         } catch (error) {
             message.error("Failed to load repair tickets");

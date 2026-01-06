@@ -35,7 +35,7 @@ export default function WholesaleApplicationsPage() {
             const params: Record<string, string> = { status: activeTab };
             if (searchText) params.search = searchText;
 
-            const data = await getWholesaleApplications(params);
+            const data = await getWholesaleApplications(params) as WholesaleApplication[];
             setApplications(data);
         } catch (error) {
             message.error("Failed to load applications");

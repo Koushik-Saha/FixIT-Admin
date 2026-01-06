@@ -46,7 +46,7 @@ export default function NewCouponPage() {
                 }
             >
                 <Form form={form} layout="vertical" onFinish={handleSubmit} initialValues={{ status: "active", restrictions: { appliesTo: "all", userRestriction: "all" } }}>
-                    <Divider orientation="left">Basic Info</Divider>
+                    <Divider>Basic Info</Divider>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                         <Form.Item name="code" label="Code" rules={[{ required: true }]}>
                             <Input placeholder="SUMMER2024" />
@@ -59,7 +59,7 @@ export default function NewCouponPage() {
                         <TextArea rows={2} />
                     </Form.Item>
 
-                    <Divider orientation="left">Discount</Divider>
+                    <Divider>Discount</Divider>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                         <Form.Item name="type" label="Type" rules={[{ required: true }]}>
                             <Select options={[{ label: "Percentage", value: "percentage" }, { label: "Fixed Amount", value: "fixed" }]} />
@@ -69,7 +69,7 @@ export default function NewCouponPage() {
                         </Form.Item>
                     </div>
 
-                    <Divider orientation="left">Restrictions</Divider>
+                    <Divider>Restrictions</Divider>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                         <Form.Item name={["restrictions", "minPurchase"]} label="Minimum Purchase">
                             <InputNumber min={0} prefix="$" style={{ width: "100%" }} />
@@ -91,7 +91,7 @@ export default function NewCouponPage() {
                         </Form.Item>
                     </div>
 
-                    <Divider orientation="left">Dates</Divider>
+                    <Divider>Dates</Divider>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                         <Form.Item name="startDate" label="Start Date" rules={[{ required: true }]}>
                             <Input type="date" />

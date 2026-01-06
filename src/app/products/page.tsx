@@ -43,7 +43,7 @@ export default function ProductsPage() {
             if (statusFilter) params.status = statusFilter;
             if (stockFilter) params.stock = stockFilter;
 
-            const data = await getProducts(params);
+            const data = await getProducts(params) as Product[];
             setProducts(data);
         } catch (error) {
             message.error("Failed to load products");

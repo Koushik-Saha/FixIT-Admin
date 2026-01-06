@@ -40,7 +40,7 @@ export default function ApplicationReviewPage() {
 
     const loadApplication = async () => {
         try {
-            const data = await getWholesaleApplication(params.id as string);
+            const data = await getWholesaleApplication(params.id as string) as WholesaleApplication;
             setApplication(data);
         } catch (error) {
             message.error("Failed to load application");
