@@ -22,6 +22,10 @@ import {
     PercentageOutlined,
     FormOutlined,
     BellOutlined,
+    TagOutlined,
+    BarChartOutlined,
+    SettingOutlined,
+    HomeOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { useRouter, usePathname } from "next/navigation";
@@ -37,15 +41,16 @@ type AdminLayoutProps = {
 
 const items: MenuProps["items"] = [
     { key: "/", icon: <DashboardOutlined />, label: "Dashboard" },
+    { key: "/analytics", icon: <BarChartOutlined />, label: "Analytics" },
     { key: "/products", icon: <ShoppingOutlined />, label: "Products" },
     { key: "/orders", icon: <ShoppingCartOutlined />, label: "Orders" },
+    { key: "/customers", icon: <UserOutlined />, label: "Customers" },
     { key: "/repairs", icon: <ToolOutlined />, label: "Repair Tickets" },
-    { key: "/wholesale", icon: <TeamOutlined />, label: "Wholesale Accounts" },
-    { key: "/pricing-tiers", icon: <DollarOutlined />, label: "Pricing Tiers" },
+    { key: "/wholesale-applications", icon: <TeamOutlined />, label: "Wholesale Apps" },
     { key: "/inventory", icon: <DatabaseOutlined />, label: "Inventory" },
-    { key: "/product-input", icon: <FormOutlined />, label: "Product Input" },
-    { key: "/bulk-pricing", icon: <PercentageOutlined />, label: "Bulk Pricing" },
-    { key: "/users", icon: <UserOutlined />, label: "User Management" },
+    { key: "/coupons", icon: <TagOutlined />, label: "Coupons" },
+    { key: "/homepage/banners", icon: <HomeOutlined />, label: "Homepage" },
+    { key: "/settings", icon: <SettingOutlined />, label: "Settings" },
 ];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {

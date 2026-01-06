@@ -2,29 +2,148 @@ export type Product = {
     id: string;
     name: string;
     sku: string;
+    slug: string;
     category: string;
     brand: string;
-    price: number;
-    wholesalePrice: number;
+    model?: string;
+    productType?: string;
+    basePrice: number;
+    costPrice?: number;
+    wholesaleDiscounts?: {
+        tier1?: number;
+        tier2?: number;
+        tier3?: number;
+    };
     stock: number;
-    status: "active" | "draft" | "archived";
+    lowStockThreshold?: number;
+    images?: string[];
+    thumbnail?: string;
+    description?: string;
+    specifications?: Record<string, any>;
+    metaTitle?: string;
+    metaDescription?: string;
+    isActive: boolean;
+    isFeatured?: boolean;
+    isNew?: boolean;
+    isBestseller?: boolean;
+    createdAt?: string;
+    updatedAt?: string;
 };
 
 export type Order = {
     id: string;
+    orderNumber: string;
     customerName: string;
+    customerEmail: string;
+    customerPhone?: string;
+    customerType: "retail" | "wholesale";
+    items: OrderItem[];
+    subtotal: number;
+    discount?: number;
+    shipping?: number;
     total: number;
-    status: "pending" | "paid" | "shipped" | "cancelled";
+    status: "processing" | "shipped" | "delivered" | "cancelled";
+    paymentStatus: "pending" | "paid" | "refunded" | "failed";
+    paymentMethod?: string;
+    paymentIntentId?: string;
+    shippingAddress?: {
+        street: string;
+        city: string;
+        state: string;
+        zip: string;
+        country: string;
+    };
+    trackingNumber?: string;
+    carrier?: string;
+    adminNotes?: string;
+    timeline?: OrderEvent[];
     createdAt: string;
+    updatedAt?: string;
+};
+
+export type OrderItem = {
+    id: string;
+    productId: string;
+    productName: string;
+    sku: string;
+    quantity: number;
+    price: number;
+    discount?: number;
+    subtotal: number;
+};
+
+export type OrderEvent = {
+    id: string;
+    type: string;
+    description: string;
+    createdAt: string;
+};
+
+export type Customer = {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    role: "customer" | "wholesale" | "admin";
+    ordersCount: number;
+    totalSpent: number;
+    wholesaleStatus?: "pending" | "approved" | "rejected";
+    wholesaleTier?: string;
+    addresses?: Address[];
+    adminNotes?: string;
+    isBlocked: boolean;
+    createdAt: string;
+};
+
+export type Address = {
+    id: string;
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+    isDefault: boolean;
 };
 
 export type RepairTicket = {
     id: string;
+    ticketNumber: string;
+    customerId: string;
     customerName: string;
-    device: string;
-    issue: string;
-    status: "new" | "in_progress" | "completed" | "cancelled";
+    customerEmail: string;
+    customerPhone?: string;
+    device: {
+        brand: string;
+        model: string;
+        imei?: string;
+        serial?: string;
+        images?: string[];
+    };
+    issue: {
+        description: string;
+        category: string;
+    };
+    status: "new" | "in_progress" | "awaiting_parts" | "completed" | "cancelled";
+    priority: "low" | "medium" | "high" | "urgent";
+    assignment?: {
+        store?: string;
+        technician?: string;
+        appointment?: string;
+    };
+    costs?: {
+        estimated?: number;
+        actual?: number;
+        parts?: number;
+        labor?: number;
+    };
+    notes?: {
+        customer?: string;
+        technician?: string;
+        internal?: string;
+    };
+    timeline?: OrderEvent[];
     createdAt: string;
+    updatedAt?: string;
 };
 
 export type WholesaleAccount = {
@@ -34,6 +153,35 @@ export type WholesaleAccount = {
     email: string;
     status: "pending" | "approved" | "rejected";
     tier: string;
+};
+
+export type WholesaleApplication = {
+    id: string;
+    businessInfo: {
+        name: string;
+        type: string;
+        taxId?: string;
+        website?: string;
+        phone: string;
+    };
+    contact: {
+        name: string;
+        email: string;
+        phone: string;
+    };
+    address: Address;
+    requestedTier: string;
+    documents?: string[];
+    status: "pending" | "approved" | "rejected";
+    statusHistory?: {
+        status: string;
+        date: string;
+        notes?: string;
+    }[];
+    adminNotes?: string;
+    createdAt: string;
+    reviewedAt?: string;
+    reviewedBy?: string;
 };
 
 export type PricingTier = {
@@ -51,4 +199,89 @@ export type InventoryItem = {
     location: string;
     stock: number;
     lowStockThreshold: number;
+    category?: string;
+};
+
+export type StockAdjustment = {
+    productId: string;
+    store: string;
+    currentStock: number;
+    adjustmentType: "add" | "remove" | "set" | "transfer";
+    amount: number;
+    reason: "restock" | "damage" | "correction" | "transfer" | "sale" | "return";
+    notes?: string;
+    transferTo?: string;
+};
+
+export type Coupon = {
+    id: string;
+    code: string;
+    description: string;
+    type: "percentage" | "fixed";
+    value: number;
+    restrictions: {
+        minPurchase?: number;
+        maxDiscount?: number;
+        maxUsesTotal?: number;
+        maxUsesPerUser?: number;
+        appliesTo: "all" | "products" | "categories";
+        productIds?: string[];
+        categoryIds?: string[];
+        userRestriction: "all" | "new" | "wholesale" | "retail";
+    };
+    startDate: string;
+    endDate?: string;
+    usageCount: number;
+    status: "active" | "inactive" | "expired";
+    createdAt: string;
+};
+
+export type Banner = {
+    id: string;
+    title: string;
+    subtitle?: string;
+    imageDesktop: string;
+    imageMobile?: string;
+    linkUrl?: string;
+    linkText?: string;
+    colors?: {
+        background?: string;
+        text?: string;
+    };
+    displayOrder: number;
+    isActive: boolean;
+    startDate?: string;
+    endDate?: string;
+    createdAt: string;
+};
+
+export type DashboardStats = {
+    today: {
+        sales: number;
+        orders: number;
+        customers: number;
+    };
+    revenue: {
+        labels: string[];
+        data: number[];
+    };
+    orderStatus: {
+        pending: number;
+        processing: number;
+        shipped: number;
+        delivered: number;
+    };
+    topProducts: {
+        id: string;
+        name: string;
+        sales: number;
+        revenue: number;
+    }[];
+    lowStockCount: number;
+    wholesaleApplicationsPending: number;
+    repairTickets: {
+        new: number;
+        inProgress: number;
+        completed: number;
+    };
 };
