@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "antd/dist/reset.css";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 export const metadata: Metadata = {
     title: "FixIt Admin Panel",
@@ -14,7 +15,9 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en">
-        <body>{children}</body>
+        <body>
+            <AuthProvider>{children}</AuthProvider>
+        </body>
         </html>
     );
 }

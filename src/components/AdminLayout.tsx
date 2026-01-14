@@ -30,6 +30,7 @@ import {
 import type { MenuProps } from "antd";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
+import UserMenu from "./UserMenu";
 
 const { Header, Sider, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -213,9 +214,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                                     style={{ fontSize: 18, color: "#e5e7eb", cursor: "pointer" }}
                                 />
                             </Badge>
-                            <Text style={{ color: "#9ca3af", fontSize: 13 }}>
-                                Notifications
-                            </Text>
+
+                            <UserMenu />
                         </Space>
                     </div>
                 </Header>

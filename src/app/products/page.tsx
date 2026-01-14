@@ -15,36 +15,64 @@ import {
     Popconfirm,
     Image,
 } from "antd";
-import { PlusOutlined, SearchOutlined, UploadOutlined, DeleteOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
+import {
+    PlusOutlined,
+    SearchOutlined,
+    UploadOutlined,
+    DeleteOutlined,
+    CheckOutlined,
+    CloseOutlined,
+} from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { TableColumnsType } from "antd";
+import type { TableColumnsType, TablePaginationConfig } from "antd";
 
 const { Search } = Input;
 
 export default function ProductsPage() {
     const router = useRouter();
+
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // filters
     const [searchText, setSearchText] = useState("");
     const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
     const [brandFilter, setBrandFilter] = useState<string | null>(null);
     const [statusFilter, setStatusFilter] = useState<string | null>(null);
     const [stockFilter, setStockFilter] = useState<string | null>(null);
+
+    // ✅ pagination state (SERVER SIDE)
+    const [page, setPage] = useState(1);
+    const [pageSize] = useState(10); // fixed 10 per page
+    const [total, setTotal] = useState(0);
+
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
+    // ✅ reset to page 1 when filters change
+    useEffect(() => {
+        setPage(1);
+    }, [searchText, categoryFilter, brandFilter, statusFilter, stockFilter]);
 
     const loadProducts = async () => {
         setLoading(true);
         try {
-            const params: Record<string, string> = {};
+            const params: Record<string, string> = {
+                page: String(page),
+                limit: String(pageSize),
+            };
+
             if (searchText) params.search = searchText;
             if (categoryFilter) params.category = categoryFilter;
             if (brandFilter) params.brand = brandFilter;
             if (statusFilter) params.status = statusFilter;
             if (stockFilter) params.stock = stockFilter;
 
-            const data = await getProducts(params) as Product[];
-            setProducts(data);
+            // API should return: { data: Product[], pagination: { total, page, limit, totalPages } }
+            const res = (await getProducts(params)) as any;
+
+            setProducts(res?.data ?? []);
+            setTotal(res?.pagination?.total ?? 0);
         } catch (error) {
             message.error("Failed to load products");
         } finally {
@@ -52,97 +80,101 @@ export default function ProductsPage() {
         }
     };
 
+    // ✅ reload when page changes or filters reset page
     useEffect(() => {
         loadProducts();
-    }, [searchText, categoryFilter, brandFilter, statusFilter, stockFilter]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [page, pageSize, searchText, categoryFilter, brandFilter, statusFilter, stockFilter]);
 
     const handleDelete = async (id: string) => {
         try {
             await deleteProduct(id);
             message.success("Product deleted");
             loadProducts();
-        } catch (error) {
+        } catch {
             message.error("Failed to delete product");
         }
     };
 
     const handleBulkDelete = async () => {
         try {
-            await Promise.all(selectedRowKeys.map(id => deleteProduct(id as string)));
+            await Promise.all(selectedRowKeys.map((id) => deleteProduct(id as string)));
             message.success(`${selectedRowKeys.length} products deleted`);
             setSelectedRowKeys([]);
             loadProducts();
-        } catch (error) {
+        } catch {
             message.error("Failed to delete products");
         }
     };
 
-    const categories = [...new Set(products.map(p => p.category))];
-    const brands = [...new Set(products.map(p => p.brand))];
+    // ⚠️ categories/brands should ideally come from a separate API,
+    // because you only have one page of products loaded.
+    const categories = [...new Set(products.map((p: any) => p.category).filter(Boolean))];
+    const brands = [...new Set(products.map((p: any) => p.brand).filter(Boolean))];
 
     const columns: TableColumnsType<Product> = [
         {
             title: "Image",
-            dataIndex: "thumbnail",
+            dataIndex: "images" as any,
             width: 80,
-            render: (url) => url ? <Image src={url} width={50} height={50} alt="" /> : "-",
+            render: (_: any, record: any) => (record.images && record.images.length > 0  ? <Image src={record.images[0]} width={50} height={50} alt="" /> : "-"),
         },
-        {
-            title: "SKU",
-            dataIndex: "sku",
-            width: 120,
-        },
-        {
-            title: "Name",
-            dataIndex: "name",
-            width: 200,
-        },
-        {
-            title: "Brand",
-            dataIndex: "brand",
-            width: 120,
-        },
+        { title: "SKU", dataIndex: "sku" as any, width: 120 },
+        { title: "Name", dataIndex: "name" as any, width: 200 },
+        { title: "Brand", dataIndex: "brand" as any, width: 120 },
         {
             title: "Model",
-            dataIndex: "model",
+            dataIndex: "product_models" as any,
             width: 120,
+            render: (_: any, record: any) => (
+                <Space size="small">
+                    <span> {record?.product_models?.name}</span>
+                </Space>
+            ),
         },
         {
             title: "Category",
-            dataIndex: "category",
+            dataIndex: "category" as any,
             width: 120,
+            render: (_: any, record: any) => (
+                <Space size="small">
+                    <span> {record?.categories?.name}</span>
+                </Space>
+            ),
         },
         {
             title: "Stock",
-            dataIndex: "stock",
+            dataIndex: "total_stock" as any,
             width: 80,
-            render: (stock, record) => (
-                <span style={{ color: record.lowStockThreshold && stock <= record.lowStockThreshold ? '#ff4d4f' : undefined }}>
-                    {stock}
-                </span>
+            render: (stock, record: any) => (
+                <span style={{ color: record.low_stock_threshold && stock <= record.low_stock_threshold ? "#ff4d4f" : undefined }}>
+          {stock}
+        </span>
             ),
         },
         {
             title: "Price",
-            dataIndex: "basePrice",
+            dataIndex: "base_price" as any,
             width: 100,
-            render: (v) => `$${v.toFixed(2)}`,
+            render: (v) => `$${v}`,
+        },
+        {
+            title: "Cost Price",
+            dataIndex: "cost_price" as any,
+            width: 100,
+            render: (v) => `$${v}`,
         },
         {
             title: "Status",
-            dataIndex: "isActive",
+            dataIndex: "is_active" as any,
             width: 100,
-            render: (isActive) => (
-                <Tag color={isActive ? "green" : "red"}>
-                    {isActive ? "Active" : "Inactive"}
-                </Tag>
-            ),
+            render: (isActive) => <Tag color={isActive ? "green" : "red"}>{isActive ? "Active" : "Inactive"}</Tag>,
         },
         {
             title: "Actions",
             width: 150,
             fixed: "right",
-            render: (_, record) => (
+            render: (_: any, record: any) => (
                 <Space size="small">
                     <Button size="small" onClick={() => router.push(`/products/${record.id}/edit`)}>
                         Edit
@@ -153,12 +185,19 @@ export default function ProductsPage() {
                         okText="Yes"
                         cancelText="No"
                     >
-                        <Button size="small" danger>Delete</Button>
+                        <Button size="small" danger>
+                            Delete
+                        </Button>
                     </Popconfirm>
                 </Space>
             ),
         },
     ];
+
+    const onTableChange = (pagination: TablePaginationConfig) => {
+        // ✅ update current page (server-side)
+        setPage(pagination.current || 1);
+    };
 
     return (
         <AdminLayout>
@@ -166,23 +205,16 @@ export default function ProductsPage() {
                 title="Products"
                 extra={
                     <Space>
-                        <Button
-                            icon={<UploadOutlined />}
-                            onClick={() => router.push("/products/bulk-import")}
-                        >
+                        <Button icon={<UploadOutlined />} onClick={() => router.push("/products/bulk-import")}>
                             Bulk Import
                         </Button>
-                        <Button
-                            type="primary"
-                            icon={<PlusOutlined />}
-                            onClick={() => router.push("/products/new")}
-                        >
+                        <Button type="primary" icon={<PlusOutlined />} onClick={() => router.push("/products/new")}>
                             New Product
                         </Button>
                     </Space>
                 }
             >
-                <Space direction="vertical" style={{ width: "100%", marginBottom: 16 }} size="middle">
+                <Space orientation="vertical" style={{ width: "100%", marginBottom: 16 }} size="middle">
                     <Search
                         placeholder="Search by name, SKU, brand, model"
                         allowClear
@@ -197,14 +229,14 @@ export default function ProductsPage() {
                             allowClear
                             style={{ width: 150 }}
                             onChange={setCategoryFilter}
-                            options={categories.map(c => ({ label: c, value: c }))}
+                            options={categories.map((c) => ({ label: c, value: c }))}
                         />
                         <Select
                             placeholder="Brand"
                             allowClear
                             style={{ width: 150 }}
                             onChange={setBrandFilter}
-                            options={brands.map(b => ({ label: b, value: b }))}
+                            options={brands.map((b) => ({ label: b, value: b }))}
                         />
                         <Select
                             placeholder="Status"
@@ -234,11 +266,10 @@ export default function ProductsPage() {
                             <span>{selectedRowKeys.length} selected</span>
                             <Button icon={<CheckOutlined />}>Activate</Button>
                             <Button icon={<CloseOutlined />}>Deactivate</Button>
-                            <Popconfirm
-                                title={`Delete ${selectedRowKeys.length} products?`}
-                                onConfirm={handleBulkDelete}
-                            >
-                                <Button danger icon={<DeleteOutlined />}>Delete</Button>
+                            <Popconfirm title={`Delete ${selectedRowKeys.length} products?`} onConfirm={handleBulkDelete}>
+                                <Button danger icon={<DeleteOutlined />}>
+                                    Delete
+                                </Button>
                             </Popconfirm>
                             <Button onClick={() => setSelectedRowKeys([])}>Clear</Button>
                         </Space>
@@ -250,12 +281,16 @@ export default function ProductsPage() {
                     loading={loading}
                     dataSource={products}
                     columns={columns}
-                    pagination={{ pageSize: 10, showSizeChanger: true, showTotal: (total) => `Total ${total} products` }}
-                    scroll={{ x: 1200 }}
-                    rowSelection={{
-                        selectedRowKeys,
-                        onChange: setSelectedRowKeys,
+                    onChange={onTableChange}
+                    pagination={{
+                        current: page,
+                        pageSize: 10,
+                        total, // ✅ real total from backend
+                        showSizeChanger: false, // fixed 10 per page
+                        showTotal: (t) => `Total ${t} products`,
                     }}
+                    scroll={{ x: 1200 }}
+                    rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
                 />
             </Card>
         </AdminLayout>
