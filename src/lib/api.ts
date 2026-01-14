@@ -1,5 +1,6 @@
 // API client utilities
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const MOCK_MODE = process.env.NEXT_PUBLIC_MOCK_AUTH === 'true';
 
 interface ApiError {
   message: string;
@@ -12,6 +13,18 @@ let onUnauthorized: (() => void) | null = null;
 
 export function setUnauthorizedCallback(callback: () => void) {
   onUnauthorized = callback;
+}
+
+// Helper to get headers with mock auth token if in mock mode
+function getHeaders(additionalHeaders: Record<string, string> = {}) {
+  const headers: Record<string, string> = { ...additionalHeaders };
+
+  // Add mock auth token in development mock mode
+  if (MOCK_MODE) {
+    headers['x-mock-auth'] = 'mock-dev-token';
+  }
+
+  return headers;
 }
 
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -44,12 +57,18 @@ async function handleResponse<T>(response: Response): Promise<T> {
 
 // Dashboard & Analytics
 export async function getDashboardStats() {
-  const response = await fetch(`${API_BASE_URL}/admin/dashboard`, { credentials: 'include' });
+  const response = await fetch(`${API_BASE_URL}/admin/dashboard`, {
+    credentials: 'include',
+    headers: getHeaders()
+  });
   return handleResponse(response);
 }
 
 export async function getAnalytics() {
-  const response = await fetch(`${API_BASE_URL}/admin/analytics`, { credentials: 'include' });
+  const response = await fetch(`${API_BASE_URL}/admin/analytics`, {
+    credentials: 'include',
+    headers: getHeaders()
+  });
   return handleResponse(response);
 }
 
@@ -78,19 +97,25 @@ export async function getUserInventory() {
 // Products
 export async function getProducts(params?: Record<string, string>) {
   const query = params ? `?${new URLSearchParams(params)}` : '';
-  const response = await fetch(`${API_BASE_URL}/admin/products${query}`, { credentials: 'include' });
+  const response = await fetch(`${API_BASE_URL}/admin/products${query}`, {
+    credentials: 'include',
+    headers: getHeaders()
+  });
   return handleResponse(response);
 }
 
 export async function getProduct(id: string) {
-  const response = await fetch(`${API_BASE_URL}/admin/products/${id}`, { credentials: 'include' });
+  const response = await fetch(`${API_BASE_URL}/admin/products/${id}`, {
+    credentials: 'include',
+    headers: getHeaders()
+  });
   return handleResponse(response);
 }
 
 export async function createProduct(data: any) {
   const response = await fetch(`${API_BASE_URL}/admin/products`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: getHeaders({ 'Content-Type': 'application/json' }),
     credentials: 'include',
     body: JSON.stringify(data),
   });
