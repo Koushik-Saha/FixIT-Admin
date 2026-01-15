@@ -11,20 +11,23 @@ const PUBLIC_ROUTES = [
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
-    // Allow public routes
-    if (PUBLIC_ROUTES.includes(pathname) || pathname.startsWith("/auth/")) {
-        return NextResponse.next();
-    }
+    // ⚠️ AUTHENTICATION DISABLED - All routes are now public
+    // Remove the comments below to re-enable authentication
 
-    // Check for auth cookie (adjust cookie name based on backend implementation)
-    const authCookie = request.cookies.get("auth_token");
+    // // Allow public routes
+    // if (PUBLIC_ROUTES.includes(pathname) || pathname.startsWith("/auth/")) {
+    //     return NextResponse.next();
+    // }
 
-    // If no auth cookie and trying to access protected route, redirect to login
-    if (!authCookie) {
-        const loginUrl = new URL("/auth/login", request.url);
-        loginUrl.searchParams.set("redirect", pathname);
-        return NextResponse.redirect(loginUrl);
-    }
+    // // Check for auth cookie (adjust cookie name based on backend implementation)
+    // const authCookie = request.cookies.get("auth_token");
+
+    // // If no auth cookie and trying to access protected route, redirect to login
+    // if (!authCookie) {
+    //     const loginUrl = new URL("/auth/login", request.url);
+    //     loginUrl.searchParams.set("redirect", pathname);
+    //     return NextResponse.redirect(loginUrl);
+    // }
 
     return NextResponse.next();
 }

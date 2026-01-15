@@ -49,18 +49,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, [handleUnauthorized]);
 
     const checkAuth = useCallback(async () => {
+        // ⚠️ AUTHENTICATION DISABLED - Uncomment to re-enable
         try {
             const userData = await getCurrentUser();
             setUser(userData);
         } catch (error) {
             setUser(null);
-            // Only redirect if not on public route
-            if (
-                !PUBLIC_ROUTES.includes(pathname) &&
-                !pathname.startsWith("/auth/")
-            ) {
-                router.push("/auth/login");
-            }
+            // // Only redirect if not on public route
+            // if (
+            //     !PUBLIC_ROUTES.includes(pathname) &&
+            //     !pathname.startsWith("/auth/")
+            // ) {
+            //     router.push("/auth/login");
+            // }
         } finally {
             setLoading(false);
         }
@@ -115,17 +116,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
     }
 
-    // Redirect to login if not authenticated and not on public route
-    if (
-        !user &&
-        !PUBLIC_ROUTES.includes(pathname) &&
-        !pathname.startsWith("/auth/")
-    ) {
-        if (typeof window !== "undefined") {
-            router.push("/auth/login");
-        }
-        return null;
-    }
+    // ⚠️ AUTHENTICATION DISABLED - Redirect to login if not authenticated
+    // if (
+    //     !user &&
+    //     !PUBLIC_ROUTES.includes(pathname) &&
+    //     !pathname.startsWith("/auth/")
+    // ) {
+    //     if (typeof window !== "undefined") {
+    //         router.push("/auth/login");
+    //     }
+    //     return null;
+    // }
 
     return (
         <AuthContext.Provider
