@@ -11,23 +11,24 @@ const PUBLIC_ROUTES = [
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
-    // ⚠️ AUTHENTICATION DISABLED - All routes are now public
-    // Remove the comments below to re-enable authentication
+    // Allow public routes
+    if (PUBLIC_ROUTES.includes(pathname) || pathname.startsWith("/auth/")) {
+        return NextResponse.next();
+    }
 
-    // // Allow public routes
-    // if (PUBLIC_ROUTES.includes(pathname) || pathname.startsWith("/auth/")) {
-    //     return NextResponse.next();
-    // }
+    // Check for Supabase auth cookies (the frontend sets these)
+    // Supabase uses cookies with pattern: sb-*-auth-token
+    const cookies = request.cookies;
+    const hasAuthCookie = Array.from(cookies.getAll()).some(
+        (cookie) => cookie.name.includes("sb-") && cookie.name.includes("auth-token")
+    );
 
-    // // Check for auth cookie (adjust cookie name based on backend implementation)
-    // const authCookie = request.cookies.get("auth_token");
-
-    // // If no auth cookie and trying to access protected route, redirect to login
-    // if (!authCookie) {
-    //     const loginUrl = new URL("/auth/login", request.url);
-    //     loginUrl.searchParams.set("redirect", pathname);
-    //     return NextResponse.redirect(loginUrl);
-    // }
+    // If no auth cookie and trying to access protected route, redirect to login
+    if (!hasAuthCookie) {
+        const loginUrl = new URL("/auth/login", request.url);
+        loginUrl.searchParams.set("redirect", pathname);
+        return NextResponse.redirect(loginUrl);
+    }
 
     return NextResponse.next();
 }

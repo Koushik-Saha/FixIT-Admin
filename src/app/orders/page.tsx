@@ -46,8 +46,8 @@ export default function OrdersPage() {
                 params.endDate = dateRange[1];
             }
 
-            const data = await getOrders(params) as Order[];
-            setOrders(data);
+            const data = (await getOrders(params)) as any;
+            setOrders(data?.data ?? []);
         } catch (error) {
             message.error("Failed to load orders");
         } finally {
@@ -87,7 +87,7 @@ export default function OrdersPage() {
     const columns: TableColumnsType<Order> = [
         {
             title: "Order#",
-            dataIndex: "orderNumber",
+            dataIndex: "order_number",
             width: 140,
         },
         {
@@ -98,21 +98,21 @@ export default function OrdersPage() {
         },
         {
             title: "Customer",
-            dataIndex: "customerName",
+            dataIndex: "customer_name",
             width: 180,
         },
         {
             title: "Email",
-            dataIndex: "customerEmail",
+            dataIndex: "customer_email",
             width: 200,
         },
         {
             title: "Type",
-            dataIndex: "customerType",
+            dataIndex: "is_wholesale",
             width: 100,
-            render: (type) => (
-                <Tag color={type === "wholesale" ? "blue" : "default"}>
-                    {type}
+            render: (is_wholesale) => (
+                <Tag color={!is_wholesale ? "blue" : "default"}>
+                    {!is_wholesale ? "Regular" : "WholeSales"}
                 </Tag>
             ),
         },
@@ -138,7 +138,7 @@ export default function OrdersPage() {
         },
         {
             title: "Payment",
-            dataIndex: "paymentStatus",
+            dataIndex: "payment_status",
             width: 120,
             render: (status) => (
                 <Tag
@@ -158,9 +158,21 @@ export default function OrdersPage() {
         },
         {
             title: "Total",
-            dataIndex: "total",
+            dataIndex: "subtotal",
             width: 120,
-            render: (v) => `$${v.toFixed(2)}`,
+            render: (v) => `$${v}`,
+        },
+        {
+            title: "Tax",
+            dataIndex: "tax_amount",
+            width: 120,
+            render: (v) => `$${v}`,
+        },
+        {
+            title: "Shipping Cost",
+            dataIndex: "shipping_cost",
+            width: 120,
+            render: (v) => `$${v}`,
         },
         {
             title: "Actions",
@@ -188,7 +200,7 @@ export default function OrdersPage() {
                     </Button>
                 }
             >
-                <Space direction="vertical" style={{ width: "100%", marginBottom: 16 }} size="middle">
+                <Space orientation="vertical" style={{ width: "100%", marginBottom: 16 }} size="middle">
                     <Search
                         placeholder="Search by order#, customer name, or email"
                         allowClear
