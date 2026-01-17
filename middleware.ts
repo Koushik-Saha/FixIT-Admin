@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { updateSession } from "@/lib/supabase/middleware";
 
 const PUBLIC_ROUTES = [
     "/auth/login",
@@ -8,7 +9,7 @@ const PUBLIC_ROUTES = [
     "/auth/reset-password",
 ];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Allow public routes
@@ -16,21 +17,17 @@ export function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    // Check for Supabase auth cookies (the frontend sets these)
-    // Supabase uses cookies with pattern: sb-*-auth-token
-    const cookies = request.cookies;
-    const hasAuthCookie = Array.from(cookies.getAll()).some(
-        (cookie) => cookie.name.includes("sb-") && cookie.name.includes("auth-token")
-    );
+    // Update Supabase session and check authentication
+    const { response, user } = await updateSession(request);
 
-    // If no auth cookie and trying to access protected route, redirect to login
-    if (!hasAuthCookie) {
+    // If no user and trying to access protected route, redirect to login
+    if (!user) {
         const loginUrl = new URL("/auth/login", request.url);
         loginUrl.searchParams.set("redirect", pathname);
         return NextResponse.redirect(loginUrl);
     }
 
-    return NextResponse.next();
+    return response;
 }
 
 export const config = {

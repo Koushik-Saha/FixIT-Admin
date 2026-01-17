@@ -1,4 +1,6 @@
 // API client utilities
+import { createClient } from './supabase/client';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 const MOCK_MODE = process.env.NEXT_PUBLIC_MOCK_AUTH === 'true';
 
@@ -15,13 +17,21 @@ export function setUnauthorizedCallback(callback: () => void) {
   onUnauthorized = callback;
 }
 
-// Helper to get headers with mock auth token if in mock mode
-function getHeaders(additionalHeaders: Record<string, string> = {}) {
+// Helper to get headers with auth token
+async function getHeaders(additionalHeaders: Record<string, string> = {}) {
   const headers: Record<string, string> = { ...additionalHeaders };
 
   // Add mock auth token in development mock mode
   if (MOCK_MODE) {
     headers['x-mock-auth'] = 'mock-dev-token';
+  } else {
+    // Get Supabase session token
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (session?.access_token) {
+      headers['Authorization'] = `Bearer ${session.access_token}`;
+    }
   }
 
   return headers;
@@ -59,7 +69,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
 export async function getDashboardStats() {
   const response = await fetch(`${API_BASE_URL}/admin/dashboard`, {
     credentials: 'include',
-    headers: getHeaders()
+    headers: await getHeaders()
   });
   return handleResponse(response);
 }
@@ -67,7 +77,7 @@ export async function getDashboardStats() {
 export async function getAnalytics() {
   const response = await fetch(`${API_BASE_URL}/admin/analytics`, {
     credentials: 'include',
-    headers: getHeaders()
+    headers: await getHeaders()
   });
   return handleResponse(response);
 }
@@ -75,14 +85,17 @@ export async function getAnalytics() {
 // Inventory Management
 export async function getInventory(params?: Record<string, string>) {
   const query = params ? `?${new URLSearchParams(params)}` : '';
-  const response = await fetch(`${API_BASE_URL}/admin/inventory${query}`, { credentials: 'include' });
+  const response = await fetch(`${API_BASE_URL}/admin/inventory${query}`, {
+    credentials: 'include',
+    headers: await getHeaders()
+  });
   return handleResponse(response);
 }
 
 export async function updateInventory(data: any) {
   const response = await fetch(`${API_BASE_URL}/admin/inventory`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: await getHeaders({ 'Content-Type': 'application/json' }),
     credentials: 'include',
     body: JSON.stringify(data),
   });
@@ -90,7 +103,10 @@ export async function updateInventory(data: any) {
 }
 
 export async function getUserInventory() {
-  const response = await fetch(`${API_BASE_URL}/admin/inventory/users`, { credentials: 'include' });
+  const response = await fetch(`${API_BASE_URL}/admin/inventory/users`, {
+    credentials: 'include',
+    headers: await getHeaders()
+  });
   return handleResponse(response);
 }
 
@@ -99,7 +115,7 @@ export async function getProducts(params?: Record<string, string>) {
   const query = params ? `?${new URLSearchParams(params)}` : '';
   const response = await fetch(`${API_BASE_URL}/admin/products${query}`, {
     credentials: 'include',
-    headers: getHeaders()
+    headers: await getHeaders()
   });
   return handleResponse(response);
 }
@@ -107,7 +123,7 @@ export async function getProducts(params?: Record<string, string>) {
 export async function getProduct(id: string) {
   const response = await fetch(`${API_BASE_URL}/admin/products/${id}`, {
     credentials: 'include',
-    headers: getHeaders()
+    headers: await getHeaders()
   });
   return handleResponse(response);
 }
@@ -115,7 +131,7 @@ export async function getProduct(id: string) {
 export async function createProduct(data: any) {
   const response = await fetch(`${API_BASE_URL}/admin/products`, {
     method: 'POST',
-    headers: getHeaders({ 'Content-Type': 'application/json' }),
+    headers: await getHeaders({ 'Content-Type': 'application/json' }),
     credentials: 'include',
     body: JSON.stringify(data),
   });
@@ -152,12 +168,18 @@ export async function bulkImportProducts(data: any) {
 // Orders
 export async function getOrders(params?: Record<string, string>) {
   const query = params ? `?${new URLSearchParams(params)}` : '';
-  const response = await fetch(`${API_BASE_URL}/orders${query}`, { credentials: 'include' });
+  const response = await fetch(`${API_BASE_URL}/orders${query}`, {
+    credentials: 'include',
+    headers: await getHeaders()
+  });
   return handleResponse(response);
 }
 
 export async function getOrder(id: string) {
-  const response = await fetch(`${API_BASE_URL}/orders/${id}`, { credentials: 'include' });
+  const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
+    credentials: 'include',
+    headers: await getHeaders()
+  });
   return handleResponse(response);
 }
 
@@ -174,7 +196,10 @@ export async function updateOrder(id: string, data: any) {
 // Wholesale Applications
 export async function getWholesaleApplications(params?: Record<string, string>) {
   const query = params ? `?${new URLSearchParams(params)}` : '';
-  const response = await fetch(`${API_BASE_URL}/wholesale/applications${query}`, { credentials: 'include' });
+  const response = await fetch(`${API_BASE_URL}/wholesale/applications${query}`, {
+    credentials: 'include',
+    headers: await getHeaders()
+  });
   return handleResponse(response);
 }
 
@@ -191,12 +216,18 @@ export async function approveWholesaleApplication(id: string, approved: boolean)
 // Repair Tickets
 export async function getRepairs(params?: Record<string, string>) {
   const query = params ? `?${new URLSearchParams(params)}` : '';
-  const response = await fetch(`${API_BASE_URL}/repairs${query}`, { credentials: 'include' });
+  const response = await fetch(`${API_BASE_URL}/repairs${query}`, {
+    credentials: 'include',
+    headers: await getHeaders()
+  });
   return handleResponse(response);
 }
 
 export async function getRepair(id: string) {
-  const response = await fetch(`${API_BASE_URL}/repairs/${id}`, { credentials: 'include' });
+  const response = await fetch(`${API_BASE_URL}/repairs/${id}`, {
+    credentials: 'include',
+    headers: await getHeaders()
+  });
   return handleResponse(response);
 }
 
@@ -213,12 +244,18 @@ export async function updateRepair(id: string, data: any) {
 // Customers (MOCK - needs implementation)
 export async function getCustomers(params?: Record<string, string>) {
   const query = params ? `?${new URLSearchParams(params)}` : '';
-  const response = await fetch(`${API_BASE_URL}/admin/customers${query}`, { credentials: 'include' });
+  const response = await fetch(`${API_BASE_URL}/admin/customers${query}`, {
+    credentials: 'include',
+    headers: await getHeaders()
+  });
   return handleResponse(response);
 }
 
 export async function getCustomer(id: string) {
-  const response = await fetch(`${API_BASE_URL}/admin/customers/${id}`, { credentials: 'include' });
+  const response = await fetch(`${API_BASE_URL}/admin/customers/${id}`, {
+    credentials: 'include',
+    headers: await getHeaders()
+  });
   return handleResponse(response);
 }
 
@@ -251,7 +288,10 @@ export async function resetCustomerPassword(id: string) {
 
 // Wholesale Applications Extended
 export async function getWholesaleApplication(id: string) {
-  const response = await fetch(`${API_BASE_URL}/wholesale/applications/${id}`, { credentials: 'include' });
+  const response = await fetch(`${API_BASE_URL}/wholesale/applications/${id}`, {
+    credentials: 'include',
+    headers: await getHeaders()
+  });
   return handleResponse(response);
 }
 
@@ -268,12 +308,18 @@ export async function reviewWholesaleApplication(id: string, data: any) {
 // Coupons (MOCK - needs implementation)
 export async function getCoupons(params?: Record<string, string>) {
   const query = params ? `?${new URLSearchParams(params)}` : '';
-  const response = await fetch(`${API_BASE_URL}/admin/coupons${query}`, { credentials: 'include' });
+  const response = await fetch(`${API_BASE_URL}/admin/coupons${query}`, {
+    credentials: 'include',
+    headers: await getHeaders()
+  });
   return handleResponse(response);
 }
 
 export async function getCoupon(id: string) {
-  const response = await fetch(`${API_BASE_URL}/admin/coupons/${id}`, { credentials: 'include' });
+  const response = await fetch(`${API_BASE_URL}/admin/coupons/${id}`, {
+    credentials: 'include',
+    headers: await getHeaders()
+  });
   return handleResponse(response);
 }
 
@@ -307,12 +353,18 @@ export async function deleteCoupon(id: string) {
 // Banners (MOCK - needs implementation)
 export async function getBanners(params?: Record<string, string>) {
   const query = params ? `?${new URLSearchParams(params)}` : '';
-  const response = await fetch(`${API_BASE_URL}/admin/banners${query}`, { credentials: 'include' });
+  const response = await fetch(`${API_BASE_URL}/admin/banners${query}`, {
+    credentials: 'include',
+    headers: await getHeaders()
+  });
   return handleResponse(response);
 }
 
 export async function getBanner(id: string) {
-  const response = await fetch(`${API_BASE_URL}/admin/banners/${id}`, { credentials: 'include' });
+  const response = await fetch(`${API_BASE_URL}/admin/banners/${id}`, {
+    credentials: 'include',
+    headers: await getHeaders()
+  });
   return handleResponse(response);
 }
 

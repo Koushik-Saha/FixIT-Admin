@@ -1,3 +1,4 @@
+import { createClient } from "./supabase/client";
 import type {
     LoginRequest,
     RegisterRequest,
@@ -67,13 +68,39 @@ export async function login(data: LoginRequest): Promise<AuthResponse> {
         };
     }
 
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(data),
+    // Use Supabase for authentication
+    const supabase = createClient();
+
+    const { data: authData, error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
     });
-    return handleAuthResponse<AuthResponse>(response);
+
+    if (error) {
+        throw {
+            message: error.message,
+            status: 401,
+        };
+    }
+
+    if (!authData.user) {
+        throw {
+            message: "Login failed",
+            status: 401,
+        };
+    }
+
+    // Fetch user profile from the frontend API
+    const response = await fetch(`${API_BASE_URL}/auth/me`, {
+        credentials: "include",
+    });
+
+    const userData = await handleAuthResponse<User>(response);
+
+    return {
+        user: userData,
+        message: "Login successful",
+    };
 }
 
 export async function register(data: RegisterRequest): Promise<AuthResponse> {
@@ -113,11 +140,9 @@ export async function logout(): Promise<void> {
         return;
     }
 
-    const response = await fetch(`${API_BASE_URL}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-    });
-    return handleAuthResponse<void>(response);
+    // Sign out from Supabase
+    const supabase = createClient();
+    await supabase.auth.signOut();
 }
 
 export async function getCurrentUser(): Promise<User> {
@@ -130,9 +155,19 @@ export async function getCurrentUser(): Promise<User> {
         return JSON.parse(storedUser);
     }
 
+    // Check Supabase session first
+    const supabase = createClient();
+    const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+
+    if (!supabaseUser) {
+        throw new Error("Not authenticated");
+    }
+
+    // Fetch user profile from the frontend API
     const response = await fetch(`${API_BASE_URL}/auth/me`, {
         credentials: "include",
     });
+
     return handleAuthResponse<User>(response);
 }
 
@@ -140,35 +175,64 @@ export async function getCurrentUser(): Promise<User> {
 export async function forgotPassword(
     data: ForgotPasswordRequest,
 ): Promise<{ message: string }> {
-    const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+    const supabase = createClient();
+
+    const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
     });
-    return handleAuthResponse(response);
+
+    if (error) {
+        throw {
+            message: error.message,
+            status: 400,
+        };
+    }
+
+    return {
+        message: "Password reset email sent successfully",
+    };
 }
 
 export async function resetPassword(
     data: ResetPasswordRequest,
 ): Promise<{ message: string }> {
-    const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+    const supabase = createClient();
+
+    const { error } = await supabase.auth.updateUser({
+        password: data.password,
     });
-    return handleAuthResponse(response);
+
+    if (error) {
+        throw {
+            message: error.message,
+            status: 400,
+        };
+    }
+
+    return {
+        message: "Password reset successfully",
+    };
 }
 
 export async function changePassword(
     data: ChangePasswordRequest,
 ): Promise<{ message: string }> {
-    const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(data),
+    const supabase = createClient();
+
+    const { error } = await supabase.auth.updateUser({
+        password: data.newPassword,
     });
-    return handleAuthResponse(response);
+
+    if (error) {
+        throw {
+            message: error.message,
+            status: 400,
+        };
+    }
+
+    return {
+        message: "Password changed successfully",
+    };
 }
 
 // Session Management
