@@ -144,32 +144,35 @@ export async function register(data: RegisterRequest): Promise<AuthResponse> {
         };
     }
 
-    if (!authData.user) {
+    if (!authData.user || !authData.session) {
         throw {
-            message: "Registration failed",
+            message: "Registration failed - no user or session returned",
             status: 400,
         };
     }
 
-    // Create admin profile in the frontend database
+    // Create admin profile directly in the database
     try {
-        const response = await fetch(`${API_BASE_URL}/auth/register`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({
-                email: data.email,
-                password: data.password,
+        const { error: profileError } = await supabase
+            .from('profiles')
+            .upsert({
+                id: authData.user.id,
+                email: authData.user.email,
                 full_name: data.name,
-            }),
-        });
+                role: 'admin',
+                wholesale_status: null,
+                wholesale_tier: null,
+            }, {
+                onConflict: 'id'
+            });
 
-        if (!response.ok) {
-            // Profile creation failed, but Supabase user was created
-            console.warn("User created in Supabase but profile creation failed");
+        if (profileError) {
+            console.error("Profile creation error:", profileError);
+            // Continue anyway - profile might already exist
         }
     } catch (error) {
         console.error("Profile creation error:", error);
+        // Continue anyway - the user was created successfully
     }
 
     const userData: User = {
@@ -183,7 +186,7 @@ export async function register(data: RegisterRequest): Promise<AuthResponse> {
 
     return {
         user: userData,
-        message: "Registration successful",
+        message: "Registration successful! You are now logged in.",
     };
 }
 
