@@ -214,16 +214,42 @@ export async function getCurrentUser(): Promise<User> {
 
     // Check Supabase session first
     const supabase = createClient();
-    const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
 
-    if (!supabaseUser) {
-        throw new Error("Not authenticated");
+    console.log('getCurrentUser - Session exists:', !!session);
+
+    if (!session) {
+        throw new Error("Not authenticated - no session");
     }
 
-    // Fetch user profile from the frontend API
+    // Verify the session is valid
+    const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+
+    console.log('getCurrentUser - User exists:', !!supabaseUser);
+
+    if (!supabaseUser) {
+        throw new Error("Not authenticated - invalid session");
+    }
+
+    // Fetch user profile from the frontend API with Bearer token
+    const headers: Record<string, string> = {
+        'Authorization': `Bearer ${session.access_token}`,
+    };
+
+    console.log('getCurrentUser - Calling /auth/me with token:', session.access_token.substring(0, 20) + '...');
+
     const response = await fetch(`${API_BASE_URL}/auth/me`, {
         credentials: "include",
+        headers,
     });
+
+    console.log('getCurrentUser - Response status:', response.status);
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error('getCurrentUser - Error response:', errorText);
+        throw new Error(`Failed to fetch user: ${response.status}`);
+    }
 
     return handleAuthResponse<User>(response);
 }
