@@ -10,14 +10,14 @@ export function createClient() {
         {
             auth: {
                 persistSession: true,
-                storageKey: 'fixit-admin-auth',
-                storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+                storageKey: 'sb-fixit-admin-auth-token',
                 autoRefreshToken: true,
-                detectSessionInUrl: true
+                detectSessionInUrl: true,
+                flowType: 'pkce'
             },
             cookieOptions: {
-                name: 'fixit-admin-auth',
-                maxAge: 86400, // 1 day in seconds
+                name: 'sb-fixit-admin-auth-token',
+                domain: undefined, // Will use current domain
                 sameSite: 'lax',
                 secure: process.env.NODE_ENV === 'production'
             }

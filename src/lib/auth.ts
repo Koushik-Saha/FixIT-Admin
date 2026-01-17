@@ -124,13 +124,67 @@ export async function register(data: RegisterRequest): Promise<AuthResponse> {
         };
     }
 
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(data),
+    // Use Supabase for registration
+    const supabase = createClient();
+
+    const { data: authData, error } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+            data: {
+                full_name: data.name,
+            },
+        },
     });
-    return handleAuthResponse<AuthResponse>(response);
+
+    if (error) {
+        throw {
+            message: error.message,
+            status: 400,
+        };
+    }
+
+    if (!authData.user) {
+        throw {
+            message: "Registration failed",
+            status: 400,
+        };
+    }
+
+    // Create admin profile in the frontend database
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+                email: data.email,
+                password: data.password,
+                full_name: data.name,
+            }),
+        });
+
+        if (!response.ok) {
+            // Profile creation failed, but Supabase user was created
+            console.warn("User created in Supabase but profile creation failed");
+        }
+    } catch (error) {
+        console.error("Profile creation error:", error);
+    }
+
+    const userData: User = {
+        id: authData.user.id,
+        email: authData.user.email || "",
+        name: data.name,
+        role: "admin",
+        createdAt: authData.user.created_at || new Date().toISOString(),
+        lastLoginAt: new Date().toISOString(),
+    };
+
+    return {
+        user: userData,
+        message: "Registration successful",
+    };
 }
 
 export async function logout(): Promise<void> {
