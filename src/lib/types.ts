@@ -14,7 +14,7 @@ export type Product = {
         tier2?: number;
         tier3?: number;
     };
-    stock: number;
+    totalStock: number;
     lowStockThreshold?: number;
     images?: string[];
     thumbnail?: string;
@@ -37,15 +37,18 @@ export type Order = {
     customerEmail: string;
     customerPhone?: string;
     customerType: "retail" | "wholesale";
-    items: OrderItem[];
-    subtotal: number;
-    discount?: number;
-    shipping?: number;
-    total: number;
-    status: "processing" | "shipped" | "delivered" | "cancelled";
+    // Backend doesn't always return items in list view
+    items?: OrderItem[];
+    // Backend uses totalAmount
+    totalAmount: number;
+    subtotal?: number;
+    taxAmount?: number;
+    shippingCost?: number;
+
+    status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
     paymentStatus: "pending" | "paid" | "refunded" | "failed";
     paymentMethod?: string;
-    paymentIntentId?: string;
+
     shippingAddress?: {
         street: string;
         city: string;
@@ -55,8 +58,7 @@ export type Order = {
     };
     trackingNumber?: string;
     carrier?: string;
-    adminNotes?: string;
-    timeline?: OrderEvent[];
+    isWholesale?: boolean;
     createdAt: string;
     updatedAt?: string;
 };
@@ -108,40 +110,22 @@ export type Address = {
 export type RepairTicket = {
     id: string;
     ticketNumber: string;
-    customerId: string;
+    customerId?: string;
     customerName: string;
     customerEmail: string;
     customerPhone?: string;
-    device: {
-        brand: string;
-        model: string;
-        imei?: string;
-        serial?: string;
-        images?: string[];
-    };
-    issue: {
-        description: string;
-        category: string;
-    };
-    status: "new" | "in_progress" | "awaiting_parts" | "completed" | "cancelled";
-    priority: "low" | "medium" | "high" | "urgent";
-    assignment?: {
-        store?: string;
-        technician?: string;
-        appointment?: string;
-    };
-    costs?: {
-        estimated?: number;
-        actual?: number;
-        parts?: number;
-        labor?: number;
-    };
-    notes?: {
-        customer?: string;
-        technician?: string;
-        internal?: string;
-    };
-    timeline?: OrderEvent[];
+
+    // Flattened device fields matching backend
+    deviceBrand: string;
+    deviceModel: string;
+    imeiSerial?: string;
+
+    issueDescription?: string;
+    issueCategory?: string;
+
+    status: "new" | "in_progress" | "awaiting_parts" | "completed" | "cancelled" | "submitted";
+    priority: "low" | "medium" | "high" | "urgent" | "normal";
+
     createdAt: string;
     updatedAt?: string;
 };

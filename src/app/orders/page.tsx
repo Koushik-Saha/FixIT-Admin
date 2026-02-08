@@ -69,9 +69,8 @@ export default function OrdersPage() {
                     o.customerName,
                     o.customerEmail,
                     o.customerType,
-                    o.status,
                     o.paymentStatus,
-                    o.total,
+                    o.totalAmount,
                 ].join(",")
             ),
         ].join("\n");
@@ -87,7 +86,7 @@ export default function OrdersPage() {
     const columns: TableColumnsType<Order> = [
         {
             title: "Order#",
-            dataIndex: "order_number",
+            dataIndex: "orderNumber",
             width: 140,
         },
         {
@@ -98,21 +97,21 @@ export default function OrdersPage() {
         },
         {
             title: "Customer",
-            dataIndex: "customer_name",
+            dataIndex: "customerName",
             width: 180,
         },
         {
             title: "Email",
-            dataIndex: "customer_email",
+            dataIndex: "customerEmail",
             width: 200,
         },
         {
             title: "Type",
-            dataIndex: "is_wholesale",
+            dataIndex: "isWholesale",
             width: 100,
-            render: (is_wholesale) => (
-                <Tag color={!is_wholesale ? "blue" : "default"}>
-                    {!is_wholesale ? "Regular" : "WholeSales"}
+            render: (isWholesale) => (
+                <Tag color={!isWholesale ? "blue" : "default"}>
+                    {!isWholesale ? "Regular" : "WholeSales"}
                 </Tag>
             ),
         },
@@ -126,19 +125,19 @@ export default function OrdersPage() {
                         status === "delivered"
                             ? "green"
                             : status === "shipped"
-                            ? "blue"
-                            : status === "processing"
-                            ? "gold"
-                            : "red"
+                                ? "blue"
+                                : status === "processing"
+                                    ? "gold"
+                                    : "red"
                     }
                 >
-                    {status.toUpperCase()}
+                    {status?.toUpperCase()}
                 </Tag>
             ),
         },
         {
             title: "Payment",
-            dataIndex: "payment_status",
+            dataIndex: "paymentStatus",
             width: 120,
             render: (status) => (
                 <Tag
@@ -146,33 +145,33 @@ export default function OrdersPage() {
                         status === "paid"
                             ? "green"
                             : status === "pending"
-                            ? "gold"
-                            : status === "refunded"
-                            ? "blue"
-                            : "red"
+                                ? "gold"
+                                : status === "refunded"
+                                    ? "blue"
+                                    : "red"
                     }
                 >
-                    {status.toUpperCase()}
+                    {status?.toUpperCase()}
                 </Tag>
             ),
         },
         {
             title: "Total",
-            dataIndex: "subtotal",
+            dataIndex: "totalAmount",
             width: 120,
-            render: (v) => `$${v}`,
+            render: (v) => `$${Number(v).toFixed(2)}`,
         },
         {
             title: "Tax",
-            dataIndex: "tax_amount",
+            dataIndex: "taxAmount",
             width: 120,
-            render: (v) => `$${v}`,
+            render: (v) => `$${Number(v || 0).toFixed(2)}`,
         },
         {
             title: "Shipping Cost",
-            dataIndex: "shipping_cost",
+            dataIndex: "shippingCost",
             width: 120,
-            render: (v) => `$${v}`,
+            render: (v) => `$${Number(v || 0).toFixed(2)}`,
         },
         {
             title: "Actions",

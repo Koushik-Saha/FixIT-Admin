@@ -66,11 +66,11 @@ export default function RepairsPage() {
         {
             title: "Device",
             width: 200,
-            render: (_, record) => `${record.device.brand} ${record.device.model}`,
+            render: (_, record) => `${record.deviceBrand} ${record.deviceModel}`,
         },
         {
             title: "Issue",
-            dataIndex: ["issue", "category"],
+            dataIndex: "issueCategory",
             width: 150,
         },
         {
@@ -83,12 +83,12 @@ export default function RepairsPage() {
                         status === "completed"
                             ? "green"
                             : status === "in_progress"
-                            ? "blue"
-                            : status === "awaiting_parts"
-                            ? "orange"
-                            : status === "new"
-                            ? "gold"
-                            : "red"
+                                ? "blue"
+                                : status === "awaiting_parts"
+                                    ? "orange"
+                                    : status === "new"
+                                        ? "gold"
+                                        : "red"
                     }
                 >
                     {status.toUpperCase().replace(/_/g, " ")}
@@ -105,10 +105,10 @@ export default function RepairsPage() {
                         priority === "urgent"
                             ? "red"
                             : priority === "high"
-                            ? "orange"
-                            : priority === "medium"
-                            ? "blue"
-                            : "default"
+                                ? "orange"
+                                : priority === "medium"
+                                    ? "blue"
+                                    : "default"
                     }
                 >
                     {priority.toUpperCase()}

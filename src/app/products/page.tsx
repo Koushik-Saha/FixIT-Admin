@@ -117,56 +117,56 @@ export default function ProductsPage() {
             title: "Image",
             dataIndex: "images" as any,
             width: 80,
-            render: (_: any, record: any) => (record.images && record.images.length > 0  ? <Image src={record.images[0]} width={50} height={50} alt="" /> : "-"),
+            render: (_: any, record: any) => (record.images && record.images.length > 0 ? <Image src={record.images[0]} width={50} height={50} alt="" /> : "-"),
         },
-        { title: "SKU", dataIndex: "sku" as any, width: 120 },
-        { title: "Name", dataIndex: "name" as any, width: 200 },
-        { title: "Brand", dataIndex: "brand" as any, width: 120 },
+        { title: "SKU", dataIndex: "sku", width: 120 },
+        { title: "Name", dataIndex: "name", width: 200 },
+        { title: "Brand", dataIndex: "brand", width: 120 },
         {
             title: "Model",
-            dataIndex: "product_models" as any,
+            dataIndex: "model",
             width: 120,
-            render: (_: any, record: any) => (
+            render: (model) => (
                 <Space size="small">
-                    <span> {record?.product_models?.name}</span>
+                    <span>{model || "-"}</span>
                 </Space>
             ),
         },
         {
             title: "Category",
-            dataIndex: "category" as any,
+            dataIndex: "category",
             width: 120,
-            render: (_: any, record: any) => (
+            render: (category) => (
                 <Space size="small">
-                    <span> {record?.categories?.name}</span>
+                    <span>{category || "-"}</span>
                 </Space>
             ),
         },
         {
             title: "Stock",
-            dataIndex: "total_stock" as any,
+            dataIndex: "totalStock",
             width: 80,
             render: (stock, record: any) => (
-                <span style={{ color: record.low_stock_threshold && stock <= record.low_stock_threshold ? "#ff4d4f" : undefined }}>
-          {stock}
-        </span>
+                <span style={{ color: record.lowStockThreshold && stock <= record.lowStockThreshold ? "#ff4d4f" : undefined }}>
+                    {stock}
+                </span>
             ),
         },
         {
             title: "Price",
-            dataIndex: "base_price" as any,
+            dataIndex: "basePrice",
             width: 100,
             render: (v) => `$${v}`,
         },
         {
             title: "Cost Price",
-            dataIndex: "cost_price" as any,
+            dataIndex: "costPrice",
             width: 100,
-            render: (v) => `$${v}`,
+            render: (v) => v ? `$${v}` : "-",
         },
         {
             title: "Status",
-            dataIndex: "is_active" as any,
+            dataIndex: "isActive",
             width: 100,
             render: (isActive) => <Tag color={isActive ? "green" : "red"}>{isActive ? "Active" : "Inactive"}</Tag>,
         },
