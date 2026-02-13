@@ -1,48 +1,48 @@
 "use client";
 
 import AdminLayout from "@/components/AdminLayout";
-import { getBanners, deleteBanner } from "@/lib/api";
-import type { Banner } from "@/lib/types";
+import { getHeroSlides, deleteHeroSlide } from "@/lib/api";
+import type { HeroSlide } from "@/lib/types";
 import { Card, Table, Tag, Space, Button, Image, message, Popconfirm } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function BannersPage() {
+export default function HeroSlidesPage() {
     const router = useRouter();
-    const [banners, setBanners] = useState<Banner[]>([]);
+    const [slides, setSlides] = useState<HeroSlide[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const loadBanners = async () => {
+    const loadSlides = async () => {
         setLoading(true);
         try {
-            const data = await getBanners() as Banner[];
-            setBanners(data);
+            const data = await getHeroSlides() as HeroSlide[];
+            setSlides(data);
         } catch (error) {
-            message.error("Failed to load banners");
+            message.error("Failed to load slides");
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        loadBanners();
+        loadSlides();
     }, []);
 
     const handleDelete = async (id: string) => {
         try {
-            await deleteBanner(id);
-            message.success("Banner deleted");
-            loadBanners();
+            await deleteHeroSlide(id);
+            message.success("Slide deleted");
+            loadSlides();
         } catch (error) {
-            message.error("Failed to delete banner");
+            message.error("Failed to delete slide");
         }
     };
 
     const columns = [
         {
             title: "Preview",
-            dataIndex: "imageDesktop",
+            dataIndex: "image",
             width: 120,
             render: (url: string) => <Image src={url} width={100} height={50} alt="" />,
         },
@@ -53,12 +53,13 @@ export default function BannersPage() {
         },
         {
             title: "Link",
-            dataIndex: "linkUrl",
+            dataIndex: "ctaPrimary",
             width: 200,
+            render: (cta: any) => cta?.link || "-",
         },
         {
             title: "Order",
-            dataIndex: "displayOrder",
+            dataIndex: "sortOrder",
             width: 100,
         },
         {
@@ -70,10 +71,10 @@ export default function BannersPage() {
         {
             title: "Actions",
             width: 150,
-            render: (_: any, record: Banner) => (
+            render: (_: any, record: HeroSlide) => (
                 <Space size="small">
                     <Button size="small" icon={<EditOutlined />} onClick={() => router.push(`/homepage/banners/${record.id}/edit`)}>Edit</Button>
-                    <Popconfirm title="Delete banner?" onConfirm={() => handleDelete(record.id)}>
+                    <Popconfirm title="Delete slide?" onConfirm={() => handleDelete(record.id)}>
                         <Button size="small" danger icon={<DeleteOutlined />}>Delete</Button>
                     </Popconfirm>
                 </Space>
@@ -84,17 +85,17 @@ export default function BannersPage() {
     return (
         <AdminLayout>
             <Card
-                title="Homepage Banners"
+                title="Hero Slides"
                 extra={
                     <Button type="primary" icon={<PlusOutlined />} onClick={() => router.push("/homepage/banners/new")}>
-                        Create Banner
+                        Create Slide
                     </Button>
                 }
             >
                 <Table
                     rowKey="id"
                     loading={loading}
-                    dataSource={banners}
+                    dataSource={slides}
                     columns={columns}
                     pagination={false}
                 />

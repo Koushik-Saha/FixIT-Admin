@@ -220,23 +220,26 @@ export type Coupon = {
     createdAt: string;
 };
 
-export type Banner = {
+export type HeroSlide = {
     id: string;
     title: string;
-    subtitle?: string;
-    imageDesktop: string;
-    imageMobile?: string;
-    linkUrl?: string;
-    linkText?: string;
-    colors?: {
-        background?: string;
-        text?: string;
+    description?: string;
+    image: string;
+    badge?: string;
+    badgeColor?: string;
+    gradient?: string;
+    ctaPrimary?: {
+        text: string;
+        link: string;
     };
-    displayOrder: number;
+    ctaSecondary?: {
+        text: string;
+        link: string;
+    };
+    sortOrder: number;
     isActive: boolean;
-    startDate?: string;
-    endDate?: string;
     createdAt: string;
+    updatedAt: string;
 };
 
 export type DashboardStats = {

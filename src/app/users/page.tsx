@@ -1,136 +1,167 @@
 "use client";
 
 import AdminLayout from "@/components/AdminLayout";
-import { fetchWholesaleAccounts } from "@/lib/mockApi";
-import type { WholesaleAccount } from "@/lib/types";
+import { getUsers, toggleBlockUser } from "@/lib/api";
 import {
     Button,
     Card,
+    Input,
+    message,
+    Popconfirm,
+    Select,
     Space,
     Table,
     Tag,
-    Typography,
-    Popconfirm,
-    message,
+    Tabs
 } from "antd";
+import Link from "next/link";
 import { useEffect, useState } from "react";
-
-const { Text } = Typography;
+import { SearchOutlined } from "@ant-design/icons";
 
 export default function UsersPage() {
-    const [accounts, setAccounts] = useState<WholesaleAccount[]>([]);
+    const [users, setUsers] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [roleFilter, setRoleFilter] = useState<string>("ALL");
+    const [searchText, setSearchText] = useState("");
+    const [total, setTotal] = useState(0);
+    const [pagination, setPagination] = useState({ current: 1, pageSize: 20 });
+
+    const fetchUsers = async (page = 1, role = "ALL", search = "") => {
+        setLoading(true);
+        try {
+            const params: any = { page: page.toString(), limit: pagination.pageSize.toString() };
+            if (role !== "ALL") params.role = role;
+            if (search) params.search = search;
+
+            const res = await getUsers(params);
+            setUsers(res.data);
+            setTotal(res.pagination.total);
+            setPagination(prev => ({ ...prev, current: page }));
+        } catch (error) {
+            message.error("Failed to fetch users");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        fetchWholesaleAccounts().then(setAccounts);
-    }, []);
+        fetchUsers(1, roleFilter, searchText);
+    }, [roleFilter]); // Search text handled by button/enter
 
-    const updateStatus = (id: string, status: WholesaleAccount["status"]) => {
-        setAccounts((prev) =>
-            prev.map((acc) => (acc.id === id ? { ...acc, status } : acc)),
-        );
-        message.success(`Account ${id} updated to ${status}`);
-        // 🔁 Later: call backend: await api.updateWholesaleStatus(id, status)
+    const handleSearch = () => {
+        fetchUsers(1, roleFilter, searchText);
     };
 
-    const approveAllPending = () => {
-        const hasPending = accounts.some((a) => a.status === "pending");
-        if (!hasPending) {
-            message.info("No pending accounts to approve.");
-            return;
+    const handleBlockToggle = async (id: string, currentStatus: boolean) => {
+        try {
+            await toggleBlockUser(id, !currentStatus);
+            message.success(`User ${!currentStatus ? 'blocked' : 'unblocked'} successfully`);
+            fetchUsers(pagination.current, roleFilter, searchText);
+        } catch (error) {
+            message.error("Failed to update block status");
         }
-        setAccounts((prev) =>
-            prev.map((acc) =>
-                acc.status === "pending" ? { ...acc, status: "approved" } : acc,
-            ),
-        );
-        message.success("All pending wholesale accounts marked as approved.");
     };
 
-    const pendingCount = accounts.filter((a) => a.status === "pending").length;
+    const columns = [
+        {
+            title: "Name",
+            dataIndex: "fullName",
+            key: "fullName",
+            render: (text: string, record: any) => (
+                <Link href={`/users/${record.id}`} style={{ fontWeight: 500 }}>
+                    {text || "N/A"}
+                </Link>
+            )
+        },
+        { title: "Email", dataIndex: "email", key: "email" },
+        { title: "Phone", dataIndex: "phone", key: "phone" },
+        {
+            title: "Role",
+            dataIndex: "role",
+            key: "role",
+            render: (role: string) => {
+                const color = role === 'ADMIN' ? 'purple' : role === 'WHOLESALE' ? 'blue' : 'default';
+                return <Tag color={color}>{role}</Tag>;
+            }
+        },
+        {
+            title: "Status",
+            dataIndex: "isBlocked",
+            key: "isBlocked",
+            render: (blocked: boolean) => (
+                <Tag color={blocked ? "red" : "success"}>
+                    {blocked ? "BLOCKED" : "ACTIVE"}
+                </Tag>
+            )
+        },
+        {
+            title: "Stats",
+            key: "stats",
+            render: (_: any, record: any) => (
+                <Space size="small" style={{ fontSize: 12, color: '#888' }}>
+                    <span>Orders: {record._count?.orders || 0}</span>
+                </Space>
+            )
+        },
+        {
+            title: "Actions",
+            key: "actions",
+            render: (_: any, record: any) => (
+                <Space>
+                    <Link href={`/users/${record.id}`}>
+                        <Button size="small">Edit</Button>
+                    </Link>
+                    <Popconfirm
+                        title={`${record.isBlocked ? "Unblock" : "Block"} this user?`}
+                        onConfirm={() => handleBlockToggle(record.id, record.isBlocked)}
+                        okText="Yes"
+                        cancelText="No"
+                    >
+                        <Button size="small" danger={!record.isBlocked} type={record.isBlocked ? 'default' : 'primary'} ghost>
+                            {record.isBlocked ? "Unblock" : "Block"}
+                        </Button>
+                    </Popconfirm>
+                </Space>
+            )
+        }
+    ];
 
     return (
         <AdminLayout>
-            <Card
-                title="User Management – Wholesale Customers"
-                extra={
-                    <Space>
-                        <Text type="secondary">
-                            Pending requests: <b>{pendingCount}</b>
-                        </Text>
-                        <Popconfirm
-                            title="Approve all pending accounts?"
-                            description="This will mark every pending wholesale account as approved."
-                            onConfirm={approveAllPending}
-                            okText="Yes, approve all"
-                            cancelText="Cancel"
-                            disabled={pendingCount === 0}
-                        >
-                            <Button type="primary" disabled={pendingCount === 0}>
-                                Approve All Pending
-                            </Button>
-                        </Popconfirm>
-                    </Space>
-                }
-            >
-                <Table<WholesaleAccount>
-                    rowKey="id"
-                    dataSource={accounts}
-                    pagination={{ pageSize: 10 }}
-                    size="middle"
-                    columns={[
-                        { title: "ID", dataIndex: "id", width: 90 },
-                        { title: "Business", dataIndex: "businessName" },
-                        { title: "Contact", dataIndex: "contactName" },
-                        { title: "Email", dataIndex: "email" },
-                        {
-                            title: "Tier",
-                            dataIndex: "tier",
-                            width: 120,
-                            render: (tier) => <Tag color="blue">{tier}</Tag>,
-                        },
-                        {
-                            title: "Status",
-                            dataIndex: "status",
-                            width: 120,
-                            render: (status) => (
-                                <Tag
-                                    color={
-                                        status === "approved"
-                                            ? "green"
-                                            : status === "pending"
-                                                ? "gold"
-                                                : "red"
-                                    }
-                                >
-                                    {status.toUpperCase()}
-                                </Tag>
-                            ),
-                        },
-                        {
-                            title: "Actions",
-                            width: 230,
-                            render: (_, record) => (
-                                <Space>
-                                    <Button
-                                        size="small"
-                                        type="primary"
-                                        disabled={record.status === "approved"}
-                                        onClick={() => updateStatus(record.id, "approved")}
-                                    >
-                                        Approve
-                                    </Button>
-                                    <Button
-                                        size="small"
-                                        danger
-                                        disabled={record.status === "rejected"}
-                                        onClick={() => updateStatus(record.id, "rejected")}
-                                    >
-                                        Reject
-                                    </Button>
-                                </Space>
-                            ),
-                        },
+            <Card title="User Management" extra={
+                <Space>
+                    <Input
+                        placeholder="Search name, email, phone"
+                        value={searchText}
+                        onChange={e => setSearchText(e.target.value)}
+                        onPressEnter={handleSearch}
+                        style={{ width: 250 }}
+                        suffix={<SearchOutlined onClick={handleSearch} style={{ cursor: 'pointer' }} />}
+                    />
+                </Space>
+            }>
+                <Tabs
+                    activeKey={roleFilter}
+                    onChange={setRoleFilter}
+                    items={[
+                        { key: "ALL", label: "All Users" },
+                        { key: "CUSTOMER", label: "Customers" },
+                        { key: "WHOLESALE", label: "Wholesale" },
+                        { key: "ADMIN", label: "Admins" },
                     ]}
+                />
+
+                <Table
+                    rowKey="id"
+                    loading={loading}
+                    dataSource={users}
+                    columns={columns}
+                    pagination={{
+                        current: pagination.current,
+                        pageSize: pagination.pageSize,
+                        total: total,
+                        onChange: (page) => fetchUsers(page, roleFilter, searchText)
+                    }}
                 />
             </Card>
         </AdminLayout>

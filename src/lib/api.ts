@@ -37,7 +37,7 @@ async function getHeaders(additionalHeaders: Record<string, string> = {}) {
   return headers;
 }
 
-async function handleResponse<T>(response: Response): Promise<T> {
+async function handleResponse<T = any>(response: Response): Promise<T> {
   if (!response.ok) {
     // Handle 401 Unauthorized - redirect to login
     if (response.status === 401) {
@@ -241,49 +241,58 @@ export async function updateRepair(id: string, data: any) {
   return handleResponse(response);
 }
 
-// Customers (MOCK - needs implementation)
-export async function getCustomers(params?: Record<string, string>) {
+// User Management
+export async function getUsers(params?: Record<string, string>) {
   const query = params ? `?${new URLSearchParams(params)}` : '';
-  const response = await fetch(`${API_BASE_URL}/admin/customers${query}`, {
+  const response = await fetch(`${API_BASE_URL}/admin/users${query}`, {
     credentials: 'include',
     headers: await getHeaders()
   });
   return handleResponse(response);
 }
 
-export async function getCustomer(id: string) {
-  const response = await fetch(`${API_BASE_URL}/admin/customers/${id}`, {
+export async function getUser(id: string) {
+  const response = await fetch(`${API_BASE_URL}/admin/users/${id}`, {
     credentials: 'include',
     headers: await getHeaders()
   });
   return handleResponse(response);
 }
 
-export async function updateCustomer(id: string, data: any) {
-  const response = await fetch(`${API_BASE_URL}/admin/customers/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+export async function updateUser(id: string, data: any) {
+  const response = await fetch(`${API_BASE_URL}/admin/users/${id}`, {
+    method: 'PATCH',
+    headers: await getHeaders({ 'Content-Type': 'application/json' }),
     credentials: 'include',
     body: JSON.stringify(data),
   });
   return handleResponse(response);
 }
 
-export async function blockCustomer(id: string, blocked: boolean) {
-  const response = await fetch(`${API_BASE_URL}/admin/customers/${id}/block`, {
+export async function toggleBlockUser(id: string, blocked: boolean) {
+  const response = await fetch(`${API_BASE_URL}/admin/users/${id}/block`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: await getHeaders({ 'Content-Type': 'application/json' }),
     credentials: 'include',
     body: JSON.stringify({ blocked }),
   });
   return handleResponse(response);
 }
 
+// Keep explicit getCustomers for backward compatibility if needed, but alias to getUsers
+export const getCustomers = (params?: Record<string, string>) => getUsers({ ...params, role: 'CUSTOMER' });
+export const getCustomer = getUser;
+export const updateCustomer = updateUser;
+export const blockCustomer = toggleBlockUser;
+
+// Password reset to be implemented on backend - temporarily mock or disable
 export async function resetCustomerPassword(id: string) {
-  const response = await fetch(`${API_BASE_URL}/admin/customers/${id}/reset-password`, {
-    method: 'POST',
-  });
-  return handleResponse(response);
+  // const response = await fetch(`${API_BASE_URL}/admin/users/${id}/reset-password`, {
+  //   method: 'POST',
+  //   headers: await getHeaders()
+  // });
+  // return handleResponse(response);
+  throw new Error("Password reset not yet implemented on backend");
 }
 
 // Wholesale Applications Extended
@@ -351,35 +360,36 @@ export async function deleteCoupon(id: string) {
 }
 
 // Banners (MOCK - needs implementation)
-export async function getBanners(params?: Record<string, string>) {
+// Hero Slides (Banners)
+export async function getHeroSlides(params?: Record<string, string>) {
   const query = params ? `?${new URLSearchParams(params)}` : '';
-  const response = await fetch(`${API_BASE_URL}/admin/banners${query}`, {
+  const response = await fetch(`${API_BASE_URL}/admin/hero-slides${query}`, {
     credentials: 'include',
     headers: await getHeaders()
   });
   return handleResponse(response);
 }
 
-export async function getBanner(id: string) {
-  const response = await fetch(`${API_BASE_URL}/admin/banners/${id}`, {
+export async function getHeroSlide(id: string) {
+  const response = await fetch(`${API_BASE_URL}/admin/hero-slides/${id}`, {
     credentials: 'include',
     headers: await getHeaders()
   });
   return handleResponse(response);
 }
 
-export async function createBanner(data: any) {
-  const response = await fetch(`${API_BASE_URL}/admin/banners`, {
+export async function createHeroSlide(data: any) {
+  const response = await fetch(`${API_BASE_URL}/admin/hero-slides`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: await getHeaders({ 'Content-Type': 'application/json' }),
     credentials: 'include',
     body: JSON.stringify(data),
   });
   return handleResponse(response);
 }
 
-export async function updateBanner(id: string, data: any) {
-  const response = await fetch(`${API_BASE_URL}/admin/banners/${id}`, {
+export async function updateHeroSlide(id: string, data: any) {
+  const response = await fetch(`${API_BASE_URL}/admin/hero-slides/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -388,8 +398,8 @@ export async function updateBanner(id: string, data: any) {
   return handleResponse(response);
 }
 
-export async function deleteBanner(id: string) {
-  const response = await fetch(`${API_BASE_URL}/admin/banners/${id}`, {
+export async function deleteHeroSlide(id: string) {
+  const response = await fetch(`${API_BASE_URL}/admin/hero-slides/${id}`, {
     method: 'DELETE',
   });
   return handleResponse(response);
@@ -400,6 +410,25 @@ export async function adjustStock(data: any) {
   const response = await fetch(`${API_BASE_URL}/admin/inventory/adjust`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(data),
+  });
+  return handleResponse(response);
+}
+
+// System Settings
+export async function getSettings() {
+  const response = await fetch(`${API_BASE_URL}/admin/settings`, {
+    credentials: 'include',
+    headers: await getHeaders()
+  });
+  return handleResponse(response);
+}
+
+export async function updateSettings(data: any) {
+  const response = await fetch(`${API_BASE_URL}/admin/settings`, {
+    method: 'POST',
+    headers: await getHeaders({ 'Content-Type': 'application/json' }),
     credentials: 'include',
     body: JSON.stringify(data),
   });
