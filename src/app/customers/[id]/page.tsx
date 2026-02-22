@@ -133,7 +133,7 @@ export default function CustomerProfilePage() {
         },
         {
             title: "Device",
-            render: (_: any, record: RepairTicket) => `${record.device.brand} ${record.device.model}`,
+            render: (_: any, record: RepairTicket) => `${record.device?.brand || record.deviceBrand} ${record.device?.model || record.deviceModel}`,
         },
         {
             title: "Status",

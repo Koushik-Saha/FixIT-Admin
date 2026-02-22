@@ -19,10 +19,10 @@ const products: Product[] = range(40).map((i) => ({
     sku: `SKU-${1000 + i}`,
     slug: `product-${1000 + i}`,
     category: i % 3 === 0 ? "Cases" : i % 3 === 1 ? "Chargers" : "Screen Protectors",
-    brand: i % 2 === 0 ? "Apple" : "Samsung",
-    basePrice: 9.99 + (i % 10) * 3,
-    stock: 5 + (i * 3) % 150,
-    isActive: i % 7 !== 0,
+    brand: ["Apple", "Samsung", "Xiaomi", "OnePlus"][i % 4],
+    basePrice: 19.99 + (i % 10) * 10,
+    totalStock: 100 - i,
+    isActive: i % 10 !== 0,
 }));
 
 const orders: Order[] = range(55).map((i) => ({
@@ -46,18 +46,10 @@ const orders: Order[] = range(55).map((i) => ({
                     : "sarah@example.com",
     customerType: i % 3 === 0 ? "wholesale" : "retail",
     items: [],
-    subtotal: Math.round((50 + (i % 20) * 17.3) * 100) / 100,
-    total: Math.round((50 + (i % 20) * 17.3) * 100) / 100,
-    status:
-        i % 5 === 0
-            ? "processing"
-            : i % 5 === 1
-                ? "shipped"
-                : i % 5 === 2
-                    ? "delivered"
-                    : i % 5 === 3
-                        ? "cancelled"
-                        : "processing",
+    subtotal: 50 + i * 10,
+    total: 60 + i * 10,
+    totalAmount: 60 + i * 10,
+    status: ["pending", "processing", "shipped", "delivered", "cancelled"][i % 5] as any,
     paymentStatus:
         i % 4 === 0
             ? "paid"
@@ -75,11 +67,12 @@ const repairs: RepairTicket[] = range(38).map((i) => ({
     customerId: `C-${100 + (i % 20)}`,
     customerName:
         i % 3 === 0 ? "Alex Kim" : i % 3 === 1 ? "Maria Gomez" : "Chris Johnson",
-    customerEmail:
-        i % 3 === 0 ? "alex@example.com" : i % 3 === 1 ? "maria@example.com" : "chris@example.com",
+    customerEmail: `customer${i}@example.com`,
+    deviceBrand: i % 2 === 0 ? "Apple" : "Samsung",
+    deviceModel: i % 2 === 0 ? "iPhone 13" : "Galaxy S21",
     device: {
         brand: i % 2 === 0 ? "Apple" : "Samsung",
-        model: i % 2 === 0 ? "iPhone 13" : "Galaxy S22",
+        model: i % 2 === 0 ? "iPhone 13" : "Galaxy S21",
     },
     issue: {
         description:

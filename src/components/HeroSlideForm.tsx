@@ -1,6 +1,6 @@
 "use client";
 
-import { Form, Input, InputNumber, Switch, Button, Space, Divider, Select, Upload } from "antd";
+import { Form, Input, InputNumber, Switch, Button, Space, Divider, Select, Upload, Card } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import type { HeroSlide } from "@/lib/types";
 
@@ -98,8 +98,10 @@ export default function HeroSlideForm({ initialValues, onFinish, loading }: Hero
             </div>
 
             <Form.Item style={{ marginTop: 24 }}>
-            </Button>
-        </Form.Item>
+                <Button type="primary" htmlType="submit" loading={loading}>
+                    Save Changes
+                </Button>
+            </Form.Item>
         </Form >
     );
 }

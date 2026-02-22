@@ -134,13 +134,13 @@ export default function RepairTicketDetailsPage() {
                     </Descriptions>
 
                     <Descriptions title="Device" bordered column={2}>
-                        <Descriptions.Item label="Brand">{ticket.device.brand}</Descriptions.Item>
-                        <Descriptions.Item label="Model">{ticket.device.model}</Descriptions.Item>
-                        <Descriptions.Item label="IMEI">{ticket.device.imei || "N/A"}</Descriptions.Item>
-                        <Descriptions.Item label="Serial">{ticket.device.serial || "N/A"}</Descriptions.Item>
+                        <Descriptions.Item label="Brand">{ticket.device?.brand || ticket.deviceBrand}</Descriptions.Item>
+                        <Descriptions.Item label="Model">{ticket.device?.model || ticket.deviceModel}</Descriptions.Item>
+                        <Descriptions.Item label="IMEI">{ticket.device?.imei || ticket.imeiSerial || "N/A"}</Descriptions.Item>
+                        <Descriptions.Item label="Serial">{ticket.device?.serial || "N/A"}</Descriptions.Item>
                     </Descriptions>
 
-                    {ticket.device.images && ticket.device.images.length > 0 && (
+                    {ticket.device?.images && ticket.device.images.length > 0 && (
                         <div>
                             <h3>Device Images</h3>
                             <Space wrap>
@@ -152,9 +152,9 @@ export default function RepairTicketDetailsPage() {
                     )}
 
                     <Descriptions title="Issue" bordered column={1}>
-                        <Descriptions.Item label="Category">{ticket.issue.category}</Descriptions.Item>
+                        <Descriptions.Item label="Category">{ticket.issue?.category || ticket.issueCategory}</Descriptions.Item>
                         <Descriptions.Item label="Description">
-                            {ticket.issue.description}
+                            {ticket.issue?.description || ticket.issueDescription}
                         </Descriptions.Item>
                     </Descriptions>
 
@@ -244,9 +244,9 @@ export default function RepairTicketDetailsPage() {
             <Modal
                 title={
                     modalType === "status" ? "Update Status" :
-                    modalType === "assignment" ? "Assign Ticket" :
-                    modalType === "costs" ? "Update Costs" :
-                    "Add Notes"
+                        modalType === "assignment" ? "Assign Ticket" :
+                            modalType === "costs" ? "Update Costs" :
+                                "Add Notes"
                 }
                 open={modalType !== null}
                 onCancel={() => setModalType(null)}

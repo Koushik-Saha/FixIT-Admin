@@ -41,9 +41,13 @@ export type Order = {
     items?: OrderItem[];
     // Backend uses totalAmount
     totalAmount: number;
+    total?: number;
     subtotal?: number;
+    discount?: number;
     taxAmount?: number;
     shippingCost?: number;
+    shipping?: number;
+    timeline?: OrderEvent[];
 
     status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
     paymentStatus: "pending" | "paid" | "refunded" | "failed";
@@ -59,6 +63,8 @@ export type Order = {
     trackingNumber?: string;
     carrier?: string;
     isWholesale?: boolean;
+    adminNotes?: string;
+    paymentIntentId?: string;
     createdAt: string;
     updatedAt?: string;
 };
@@ -122,6 +128,40 @@ export type RepairTicket = {
 
     issueDescription?: string;
     issueCategory?: string;
+
+    // Nested structures for UI
+    device?: {
+        brand: string;
+        model: string;
+        imei?: string;
+        serial?: string;
+        images?: string[];
+    };
+    issue?: {
+        category: string;
+        description: string;
+    };
+    assignment?: {
+        store?: string;
+        technician?: string;
+        appointment?: string;
+    };
+    costs?: {
+        estimated?: number;
+        actual?: number;
+        parts?: number;
+        labor?: number;
+    };
+    notes?: {
+        customer?: string;
+        technician?: string;
+        internal?: string;
+    };
+    timeline?: {
+        type: string;
+        description: string;
+        createdAt: string;
+    }[];
 
     status: "new" | "in_progress" | "awaiting_parts" | "completed" | "cancelled" | "submitted";
     priority: "low" | "medium" | "high" | "urgent" | "normal";

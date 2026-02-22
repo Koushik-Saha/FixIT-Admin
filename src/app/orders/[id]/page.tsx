@@ -161,10 +161,10 @@ export default function OrderDetailsPage() {
                                     order.status === "delivered"
                                         ? "green"
                                         : order.status === "shipped"
-                                        ? "blue"
-                                        : order.status === "processing"
-                                        ? "gold"
-                                        : "red"
+                                            ? "blue"
+                                            : order.status === "processing"
+                                                ? "gold"
+                                                : "red"
                                 }
                             >
                                 {order.status.toUpperCase()}
@@ -176,10 +176,10 @@ export default function OrderDetailsPage() {
                                     order.paymentStatus === "paid"
                                         ? "green"
                                         : order.paymentStatus === "pending"
-                                        ? "gold"
-                                        : order.paymentStatus === "refunded"
-                                        ? "blue"
-                                        : "red"
+                                            ? "gold"
+                                            : order.paymentStatus === "refunded"
+                                                ? "blue"
+                                                : "red"
                                 }
                             >
                                 {order.paymentStatus.toUpperCase()}
@@ -237,20 +237,20 @@ export default function OrderDetailsPage() {
 
                     <Descriptions title="Payment Summary" bordered column={1}>
                         <Descriptions.Item label="Subtotal">
-                            ${order.subtotal.toFixed(2)}
+                            ${(order.subtotal || 0).toFixed(2)}
                         </Descriptions.Item>
                         {order.discount && (
                             <Descriptions.Item label="Discount">
-                                -${order.discount.toFixed(2)}
+                                -${(order.discount || 0).toFixed(2)}
                             </Descriptions.Item>
                         )}
                         {order.shipping && (
                             <Descriptions.Item label="Shipping">
-                                ${order.shipping.toFixed(2)}
+                                ${(order.shipping || 0).toFixed(2)}
                             </Descriptions.Item>
                         )}
                         <Descriptions.Item label="Total">
-                            <strong>${order.total.toFixed(2)}</strong>
+                            <strong>${(order.total || order.totalAmount || 0).toFixed(2)}</strong>
                         </Descriptions.Item>
                     </Descriptions>
 

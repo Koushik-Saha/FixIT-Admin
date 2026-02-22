@@ -28,7 +28,7 @@ export default function ProductInputPage() {
             category: values.category,
             brand: values.brand,
             basePrice: values.basePrice,
-            stock: values.stock,
+            totalStock: values.stock,
             isActive: true,
         };
 
@@ -137,7 +137,7 @@ export default function ProductInputPage() {
                             dataIndex: "basePrice",
                             render: (v) => `$${v.toFixed(2)}`,
                         },
-                        { title: "Stock", dataIndex: "stock" },
+                        { title: "Stock", dataIndex: "totalStock" },
                     ]}
                 />
             </Card>
