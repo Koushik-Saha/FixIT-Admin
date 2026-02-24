@@ -16,8 +16,8 @@ export default function HeroSlidesPage() {
     const loadSlides = async () => {
         setLoading(true);
         try {
-            const data = await getHeroSlides() as HeroSlide[];
-            setSlides(data);
+            const response = await getHeroSlides() as any;
+            setSlides(response?.data || []);
         } catch (error) {
             message.error("Failed to load slides");
         } finally {

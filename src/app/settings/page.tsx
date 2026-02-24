@@ -16,11 +16,11 @@ export default function SettingsPage() {
     const loadSettings = async () => {
         setLoading(true);
         try {
-            const data = await getSettings();
-            if (data) {
-                generalForm.setFieldsValue(data);
-                paymentForm.setFieldsValue(data);
-                shippingForm.setFieldsValue(data);
+            const res = await getSettings();
+            if (res && res.success && res.data) {
+                generalForm.setFieldsValue(res.data);
+                paymentForm.setFieldsValue(res.data);
+                shippingForm.setFieldsValue(res.data);
             }
         } catch (error) {
             message.error("Failed to load settings");
@@ -36,8 +36,12 @@ export default function SettingsPage() {
     const handleSubmit = async (values: any) => {
         try {
             message.loading({ content: "Saving...", key: "save" });
-            await updateSettings(values);
-            message.success({ content: "Settings saved", key: "save" });
+            const res = await updateSettings(values);
+            if (res.success) {
+                message.success({ content: "Settings saved", key: "save" });
+            } else {
+                message.error({ content: res.message || "Failed to save settings", key: "save" });
+            }
         } catch (error) {
             message.error({ content: "Failed to save settings", key: "save" });
         }

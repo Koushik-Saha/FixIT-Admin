@@ -26,6 +26,10 @@ import {
     BarChartOutlined,
     SettingOutlined,
     HomeOutlined,
+    MenuOutlined,
+    MailOutlined,
+    PictureOutlined,
+    LayoutOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { useRouter, usePathname } from "next/navigation";
@@ -44,13 +48,29 @@ const items: MenuProps["items"] = [
     { key: "/", icon: <DashboardOutlined />, label: "Dashboard" },
     { key: "/analytics", icon: <BarChartOutlined />, label: "Analytics" },
     { key: "/products", icon: <ShoppingOutlined />, label: "Products" },
+    { key: "/categories", icon: <DatabaseOutlined />, label: "Categories" },
+    { key: "/brands", icon: <TagOutlined />, label: "Brands" },
+    { key: "/device-models", icon: <TagOutlined />, label: "Device Models" },
+    { key: "/pages", icon: <FormOutlined />, label: "CMS Pages" },
+    { key: "/navigation", icon: <MenuOutlined />, label: "Mega Menu" },
+    { key: "/stores", icon: <HomeOutlined />, label: "Store Locations" },
     { key: "/orders", icon: <ShoppingCartOutlined />, label: "Orders" },
     { key: "/customers", icon: <UserOutlined />, label: "Customers" },
     { key: "/repairs", icon: <ToolOutlined />, label: "Repair Tickets" },
     { key: "/wholesale-applications", icon: <TeamOutlined />, label: "Wholesale Apps" },
     { key: "/inventory", icon: <DatabaseOutlined />, label: "Inventory" },
-    { key: "/coupons", icon: <TagOutlined />, label: "Coupons" },
-    { key: "/homepage/banners", icon: <HomeOutlined />, label: "Homepage" },
+    {
+        key: 'marketing_group',
+        label: 'Marketing',
+        type: 'group',
+        children: [
+            { key: "/coupons", icon: <DollarOutlined />, label: "Coupons" },
+            { key: "/homepage/banners", icon: <PictureOutlined />, label: "Banners" },
+            { key: "/homepage/settings", icon: <LayoutOutlined />, label: "Homepage Layout" },
+            { key: "/bulk-pricing", icon: <PercentageOutlined />, label: "Bulk Pricing" },
+            { key: "/newsletter", icon: <MailOutlined />, label: "Newsletter" },
+        ]
+    },
     { key: "/settings", icon: <SettingOutlined />, label: "Settings" },
 ];
 
@@ -112,8 +132,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                                 fontSize: 16,
                             }}
                         >
-              FixIt Admin
-            </span>
+                            FixIt Admin
+                        </span>
                     )}
                 </div>
 
@@ -198,14 +218,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                                     gap: 6,
                                 }}
                             >
-                <span
-                    style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: "999px",
-                        background: "#22c55e",
-                    }}
-                />
+                                <span
+                                    style={{
+                                        width: 8,
+                                        height: 8,
+                                        borderRadius: "999px",
+                                        background: "#22c55e",
+                                    }}
+                                />
                                 Live environment
                             </div>
 

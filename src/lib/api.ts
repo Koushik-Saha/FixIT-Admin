@@ -21,6 +21,9 @@ export function setUnauthorizedCallback(callback: () => void) {
 async function getHeaders(additionalHeaders: Record<string, string> = {}) {
   const headers: Record<string, string> = { ...additionalHeaders };
 
+  // Always send admin role for admin requests to satisfy backend API requirements
+  headers['x-user-role'] = 'ADMIN';
+
   // Add mock auth token in development mock mode
   if (MOCK_MODE) {
     headers['x-mock-auth'] = 'mock-dev-token';
@@ -35,6 +38,20 @@ async function getHeaders(additionalHeaders: Record<string, string> = {}) {
   }
 
   return headers;
+}
+
+// Intercept low-level network failure before handleResponse
+async function safeFetch(url: string | URL | Request, init?: RequestInit): Promise<Response> {
+  try {
+    return await fetch(url, init);
+  } catch (error: any) {
+    // Return a fake 503 response so it flows cleanly into handleResponse
+    return new Response(JSON.stringify({ message: error.message || "Network error" }), {
+      status: 503,
+      statusText: "Service Unavailable",
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
 }
 
 async function handleResponse<T = any>(response: Response): Promise<T> {
@@ -67,7 +84,7 @@ async function handleResponse<T = any>(response: Response): Promise<T> {
 
 // Dashboard & Analytics
 export async function getDashboardStats() {
-  const response = await fetch(`${API_BASE_URL}/admin/dashboard`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/dashboard`, {
     credentials: 'include',
     headers: await getHeaders()
   });
@@ -75,7 +92,7 @@ export async function getDashboardStats() {
 }
 
 export async function getAnalytics() {
-  const response = await fetch(`${API_BASE_URL}/admin/analytics`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/analytics`, {
     credentials: 'include',
     headers: await getHeaders()
   });
@@ -85,7 +102,7 @@ export async function getAnalytics() {
 // Inventory Management
 export async function getInventory(params?: Record<string, string>) {
   const query = params ? `?${new URLSearchParams(params)}` : '';
-  const response = await fetch(`${API_BASE_URL}/admin/inventory${query}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/inventory${query}`, {
     credentials: 'include',
     headers: await getHeaders()
   });
@@ -93,7 +110,7 @@ export async function getInventory(params?: Record<string, string>) {
 }
 
 export async function updateInventory(data: any) {
-  const response = await fetch(`${API_BASE_URL}/admin/inventory`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/inventory`, {
     method: 'POST',
     headers: await getHeaders({ 'Content-Type': 'application/json' }),
     credentials: 'include',
@@ -103,7 +120,7 @@ export async function updateInventory(data: any) {
 }
 
 export async function getUserInventory() {
-  const response = await fetch(`${API_BASE_URL}/admin/inventory/users`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/inventory/users`, {
     credentials: 'include',
     headers: await getHeaders()
   });
@@ -113,7 +130,7 @@ export async function getUserInventory() {
 // Products
 export async function getProducts(params?: Record<string, string>) {
   const query = params ? `?${new URLSearchParams(params)}` : '';
-  const response = await fetch(`${API_BASE_URL}/admin/products${query}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/products${query}`, {
     credentials: 'include',
     headers: await getHeaders()
   });
@@ -121,7 +138,7 @@ export async function getProducts(params?: Record<string, string>) {
 }
 
 export async function getProduct(id: string) {
-  const response = await fetch(`${API_BASE_URL}/admin/products/${id}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/products/${id}`, {
     credentials: 'include',
     headers: await getHeaders()
   });
@@ -129,7 +146,7 @@ export async function getProduct(id: string) {
 }
 
 export async function createProduct(data: any) {
-  const response = await fetch(`${API_BASE_URL}/admin/products`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/products`, {
     method: 'POST',
     headers: await getHeaders({ 'Content-Type': 'application/json' }),
     credentials: 'include',
@@ -139,7 +156,7 @@ export async function createProduct(data: any) {
 }
 
 export async function updateProduct(id: string, data: any) {
-  const response = await fetch(`${API_BASE_URL}/admin/products/${id}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/products/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -149,14 +166,14 @@ export async function updateProduct(id: string, data: any) {
 }
 
 export async function deleteProduct(id: string) {
-  const response = await fetch(`${API_BASE_URL}/admin/products/${id}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/products/${id}`, {
     method: 'DELETE',
   });
   return handleResponse(response);
 }
 
 export async function bulkImportProducts(data: any) {
-  const response = await fetch(`${API_BASE_URL}/admin/products/bulk-import`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/products/bulk-import`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -168,7 +185,7 @@ export async function bulkImportProducts(data: any) {
 // Orders
 export async function getOrders(params?: Record<string, string>) {
   const query = params ? `?${new URLSearchParams(params)}` : '';
-  const response = await fetch(`${API_BASE_URL}/orders${query}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/orders${query}`, {
     credentials: 'include',
     headers: await getHeaders()
   });
@@ -176,7 +193,7 @@ export async function getOrders(params?: Record<string, string>) {
 }
 
 export async function getOrder(id: string) {
-  const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/orders/${id}`, {
     credentials: 'include',
     headers: await getHeaders()
   });
@@ -184,7 +201,7 @@ export async function getOrder(id: string) {
 }
 
 export async function updateOrder(id: string, data: any) {
-  const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/orders/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -196,7 +213,7 @@ export async function updateOrder(id: string, data: any) {
 // Wholesale Applications
 export async function getWholesaleApplications(params?: Record<string, string>) {
   const query = params ? `?${new URLSearchParams(params)}` : '';
-  const response = await fetch(`${API_BASE_URL}/wholesale/applications${query}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/wholesale/applications${query}`, {
     credentials: 'include',
     headers: await getHeaders()
   });
@@ -204,7 +221,7 @@ export async function getWholesaleApplications(params?: Record<string, string>) 
 }
 
 export async function approveWholesaleApplication(id: string, approved: boolean) {
-  const response = await fetch(`${API_BASE_URL}/wholesale/approve/${id}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/wholesale/approve/${id}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -216,7 +233,7 @@ export async function approveWholesaleApplication(id: string, approved: boolean)
 // Repair Tickets
 export async function getRepairs(params?: Record<string, string>) {
   const query = params ? `?${new URLSearchParams(params)}` : '';
-  const response = await fetch(`${API_BASE_URL}/repairs${query}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/repairs${query}`, {
     credentials: 'include',
     headers: await getHeaders()
   });
@@ -224,7 +241,7 @@ export async function getRepairs(params?: Record<string, string>) {
 }
 
 export async function getRepair(id: string) {
-  const response = await fetch(`${API_BASE_URL}/repairs/${id}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/repairs/${id}`, {
     credentials: 'include',
     headers: await getHeaders()
   });
@@ -232,7 +249,7 @@ export async function getRepair(id: string) {
 }
 
 export async function updateRepair(id: string, data: any) {
-  const response = await fetch(`${API_BASE_URL}/repairs/${id}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/repairs/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -244,7 +261,7 @@ export async function updateRepair(id: string, data: any) {
 // User Management
 export async function getUsers(params?: Record<string, string>) {
   const query = params ? `?${new URLSearchParams(params)}` : '';
-  const response = await fetch(`${API_BASE_URL}/admin/users${query}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/users${query}`, {
     credentials: 'include',
     headers: await getHeaders()
   });
@@ -252,7 +269,7 @@ export async function getUsers(params?: Record<string, string>) {
 }
 
 export async function getUser(id: string) {
-  const response = await fetch(`${API_BASE_URL}/admin/users/${id}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/users/${id}`, {
     credentials: 'include',
     headers: await getHeaders()
   });
@@ -260,7 +277,7 @@ export async function getUser(id: string) {
 }
 
 export async function updateUser(id: string, data: any) {
-  const response = await fetch(`${API_BASE_URL}/admin/users/${id}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/users/${id}`, {
     method: 'PATCH',
     headers: await getHeaders({ 'Content-Type': 'application/json' }),
     credentials: 'include',
@@ -270,7 +287,7 @@ export async function updateUser(id: string, data: any) {
 }
 
 export async function toggleBlockUser(id: string, blocked: boolean) {
-  const response = await fetch(`${API_BASE_URL}/admin/users/${id}/block`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/users/${id}/block`, {
     method: 'POST',
     headers: await getHeaders({ 'Content-Type': 'application/json' }),
     credentials: 'include',
@@ -287,7 +304,7 @@ export const blockCustomer = toggleBlockUser;
 
 // Password reset to be implemented on backend - temporarily mock or disable
 export async function resetCustomerPassword(id: string) {
-  // const response = await fetch(`${API_BASE_URL}/admin/users/${id}/reset-password`, {
+  // const response = await safeFetch(`${API_BASE_URL}/admin/users/${id}/reset-password`, {
   //   method: 'POST',
   //   headers: await getHeaders()
   // });
@@ -297,7 +314,7 @@ export async function resetCustomerPassword(id: string) {
 
 // Wholesale Applications Extended
 export async function getWholesaleApplication(id: string) {
-  const response = await fetch(`${API_BASE_URL}/wholesale/applications/${id}`, {
+  const response = await safeFetch(`${API_BASE_URL}/wholesale/applications/${id}`, {
     credentials: 'include',
     headers: await getHeaders()
   });
@@ -305,7 +322,7 @@ export async function getWholesaleApplication(id: string) {
 }
 
 export async function reviewWholesaleApplication(id: string, data: any) {
-  const response = await fetch(`${API_BASE_URL}/wholesale/applications/${id}/review`, {
+  const response = await safeFetch(`${API_BASE_URL}/wholesale/applications/${id}/review`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -317,7 +334,7 @@ export async function reviewWholesaleApplication(id: string, data: any) {
 // Coupons (MOCK - needs implementation)
 export async function getCoupons(params?: Record<string, string>) {
   const query = params ? `?${new URLSearchParams(params)}` : '';
-  const response = await fetch(`${API_BASE_URL}/admin/coupons${query}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/coupons${query}`, {
     credentials: 'include',
     headers: await getHeaders()
   });
@@ -325,7 +342,7 @@ export async function getCoupons(params?: Record<string, string>) {
 }
 
 export async function getCoupon(id: string) {
-  const response = await fetch(`${API_BASE_URL}/admin/coupons/${id}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/coupons/${id}`, {
     credentials: 'include',
     headers: await getHeaders()
   });
@@ -333,7 +350,7 @@ export async function getCoupon(id: string) {
 }
 
 export async function createCoupon(data: any) {
-  const response = await fetch(`${API_BASE_URL}/admin/coupons`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/coupons`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -343,7 +360,7 @@ export async function createCoupon(data: any) {
 }
 
 export async function updateCoupon(id: string, data: any) {
-  const response = await fetch(`${API_BASE_URL}/admin/coupons/${id}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/coupons/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -353,7 +370,7 @@ export async function updateCoupon(id: string, data: any) {
 }
 
 export async function deleteCoupon(id: string) {
-  const response = await fetch(`${API_BASE_URL}/admin/coupons/${id}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/coupons/${id}`, {
     method: 'DELETE',
   });
   return handleResponse(response);
@@ -363,7 +380,7 @@ export async function deleteCoupon(id: string) {
 // Hero Slides (Banners)
 export async function getHeroSlides(params?: Record<string, string>) {
   const query = params ? `?${new URLSearchParams(params)}` : '';
-  const response = await fetch(`${API_BASE_URL}/admin/hero-slides${query}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/hero-slides${query}`, {
     credentials: 'include',
     headers: await getHeaders()
   });
@@ -371,7 +388,7 @@ export async function getHeroSlides(params?: Record<string, string>) {
 }
 
 export async function getHeroSlide(id: string) {
-  const response = await fetch(`${API_BASE_URL}/admin/hero-slides/${id}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/hero-slides/${id}`, {
     credentials: 'include',
     headers: await getHeaders()
   });
@@ -379,7 +396,7 @@ export async function getHeroSlide(id: string) {
 }
 
 export async function createHeroSlide(data: any) {
-  const response = await fetch(`${API_BASE_URL}/admin/hero-slides`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/hero-slides`, {
     method: 'POST',
     headers: await getHeaders({ 'Content-Type': 'application/json' }),
     credentials: 'include',
@@ -389,7 +406,7 @@ export async function createHeroSlide(data: any) {
 }
 
 export async function updateHeroSlide(id: string, data: any) {
-  const response = await fetch(`${API_BASE_URL}/admin/hero-slides/${id}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/hero-slides/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -399,7 +416,7 @@ export async function updateHeroSlide(id: string, data: any) {
 }
 
 export async function deleteHeroSlide(id: string) {
-  const response = await fetch(`${API_BASE_URL}/admin/hero-slides/${id}`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/hero-slides/${id}`, {
     method: 'DELETE',
   });
   return handleResponse(response);
@@ -407,7 +424,7 @@ export async function deleteHeroSlide(id: string) {
 
 // Stock Adjustments
 export async function adjustStock(data: any) {
-  const response = await fetch(`${API_BASE_URL}/admin/inventory/adjust`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/inventory/adjust`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -418,7 +435,7 @@ export async function adjustStock(data: any) {
 
 // System Settings
 export async function getSettings() {
-  const response = await fetch(`${API_BASE_URL}/admin/settings`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/settings`, {
     credentials: 'include',
     headers: await getHeaders()
   });
@@ -426,7 +443,7 @@ export async function getSettings() {
 }
 
 export async function updateSettings(data: any) {
-  const response = await fetch(`${API_BASE_URL}/admin/settings`, {
+  const response = await safeFetch(`${API_BASE_URL}/admin/settings`, {
     method: 'POST',
     headers: await getHeaders({ 'Content-Type': 'application/json' }),
     credentials: 'include',

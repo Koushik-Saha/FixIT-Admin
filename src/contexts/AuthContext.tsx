@@ -98,6 +98,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }, []);
 
+    // Redirect to login if not authenticated
+    useEffect(() => {
+        if (!loading && !user && !PUBLIC_ROUTES.includes(pathname) && !pathname.startsWith("/auth/")) {
+            router.push("/auth/login");
+        }
+    }, [user, loading, pathname, router]);
+
     // Show loading spinner while checking auth
     if (loading) {
         return (
@@ -115,15 +122,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
     }
 
-    // Redirect to login if not authenticated
-    if (
-        !user &&
-        !PUBLIC_ROUTES.includes(pathname) &&
-        !pathname.startsWith("/auth/")
-    ) {
-        if (typeof window !== "undefined") {
-            router.push("/auth/login");
-        }
+    // Show blank page while waiting for redirect (prevents flashing protected content)
+    if (!loading && !user && !PUBLIC_ROUTES.includes(pathname) && !pathname.startsWith("/auth/")) {
         return null;
     }
 

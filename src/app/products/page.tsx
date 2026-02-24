@@ -109,7 +109,7 @@ export default function ProductsPage() {
 
     // ⚠️ categories/brands should ideally come from a separate API,
     // because you only have one page of products loaded.
-    const categories = [...new Set(products.map((p: any) => p.category).filter(Boolean))];
+    const categories = [...new Set(products.map((p: any) => p.category?.name).filter(Boolean))];
     const brands = [...new Set(products.map((p: any) => p.brand).filter(Boolean))];
 
     const columns: TableColumnsType<Product> = [
@@ -138,7 +138,7 @@ export default function ProductsPage() {
             width: 120,
             render: (category) => (
                 <Space size="small">
-                    <span>{category || "-"}</span>
+                    <span>{category?.name || category || "-"}</span>
                 </Space>
             ),
         },
